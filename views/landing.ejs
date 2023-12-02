@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Green Humanity</title>
+  <link rel="stylesheet" href="node_modules/@glidejs/glide/dist/css/glide.core.min.css">
+  <link rel="icon" type="images/png" href="images/logo1.png">
+  <link rel="stylesheet" href="tw-elements/dist/css/tw-elements.min.css">
+
+  <link rel="stylesheet" href="../assets/landing.css">
+  <script>
+    function scrollabout() {
+      var element = document.getElementById("about");
+
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+
+    function checkLogin() {
+
+      fetch('/api/auth/isloggedin', {
+      }).then((async (res) => {
+        console.log(await res)
+        const data = await res.json()
+
+        if (res.status == 200) {
+          var login = document.getElementById('login')
+          var register = document.getElementById('reg')
+          var reg1 = document.getElementById('regu')
+          login.remove()
+          register.remove()
+          regu.remove()
+        }
+
+      })).catch((err) => {
+        console.log("Internal server error 500 -> " + err);
+      })
+    }
+    checkLogin()
+  </script>
+</head>
+
+<body>
+  <!-- Header-->
+  <header class="text-gray-600 bg-gray-100">
+    <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
+      <a class="flex font-medium items-center text-gray-900  md:mb-0">
+        <img src="/images/logo1.png" class="w-14 h-14 text-white p-2 rounded-full" />
+        <span class="ml-3 font-bold text-xl">Green Humanity</span>
+      </a>
+      <nav class="md:ml-auto flex flex-wrap items-center text-base justify-center">
+        <a class="mr-5 hover:text-gray-900 " id="login" href="login">Login</a>
+        <a class="mr-5 hover:text-gray-900" id="reg" href="register">Register</a>
+        <a class="mr-5 hover:text-gray-900" href="aboutus">About us</a>
+        <a class="mr-5 hover:text-gray-900" href="contact">Contact us</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Body -->
+  <div id="carouselExampleControls" class="relative" data-te-carousel-init data-te-ride="carousel">
+    <!--Carousel items-->
+    <div class="relative w-full h-1/2 overflow-hidden after:clear-both after:block after:content-['']">
+      <!--First item-->
+      <div
+        class="relative float-left -mr-[100%] w-full transition-transform duration-[600ms] ease-in-out motion-reduce:transition-none"
+        data-te-carousel-item data-te-carousel-active>
+        <img src="/images/slide1.jpg" class="block w-full" alt="Wild Landscape" />
+
+      </div>
+      <!--Second item-->
+      <div
+        class="relative float-left -mr-[100%] hidden w-full transition-transform duration-[600ms] ease-in-out motion-reduce:transition-none"
+        data-te-carousel-item>
+        <img src="/images/slide2.jpg" class="block w-full" alt="Camera" />
+      </div>
+      <!--Third item-->
+      <div
+        class="relative float-left -mr-[100%] hidden w-full transition-transform duration-[600ms] ease-in-out motion-reduce:transition-none"
+        data-te-carousel-item>
+        <img src="/images/slide3.jpg" class="block w-full" alt="Exotic Fruits" />
+      </div>
+    </div>
+    <div class="absolute inset-x-[15%] top-4 hidden py-5 text-center text-white md:block">
+      <p>
+      <h2 class="text-9xl font-bold" style="color: #00BF63;">Green</h2>
+      <h2 class="text-9xl font-bold ">Humanity</h2>
+      </p>
+
+      <a id="regu" href="javascript:scrollabout()">
+        <p
+          class="mx-auto  w-fit text-green-500  border-0  py-2 px-8 focus:outline-none hover:bg-green-600 rounded-full text-lg">
+          About</p>
+      </a>
+      <a id="regu" href="register">
+        <button
+          class="flex mx-auto mt-16 text-green-500 bg-white border-0  py-2 px-8 focus:outline-none hover:bg-green-600 rounded-full text-lg">Register
+          Now</button>
+      </a>
+    </div>
+    <!--Carousel controls - prev item-->
+    <button
+      class="absolute bottom-0 left-0 top-0 z-[1] flex w-[15%] items-center justify-center border-0 bg-none p-0 text-center text-white opacity-50 transition-opacity duration-150 ease-[cubic-bezier(0.25,0.1,0.25,1.0)] hover:text-white hover:no-underline hover:opacity-90 hover:outline-none focus:text-white focus:no-underline focus:opacity-90 focus:outline-none motion-reduce:transition-none"
+      type="button" data-te-target="#carouselExampleControls" data-te-slide="prev">
+      <span class="inline-block h-4 w-4">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+          class="h-6 w-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </span>
+      <span
+        class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Previous</span>
+    </button>
+    <!--Carousel controls - next item-->
+    <button
+      class="absolute bottom-0 right-0 top-0 z-[1] flex w-[15%] items-center justify-center border-0 bg-none p-0 text-center text-white opacity-50 transition-opacity duration-150 ease-[cubic-bezier(0.25,0.1,0.25,1.0)] hover:text-white hover:no-underline hover:opacity-90 hover:outline-none focus:text-white focus:no-underline focus:opacity-90 focus:outline-none motion-reduce:transition-none"
+      type="button" data-te-target="#carouselExampleControls" data-te-slide="next">
+      <span class="inline-block h-8 w-8">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+          class="h-6 w-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </span>
+      <span
+        class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Next</span>
+    </button>
+  </div>
+
+  <section  id= "about" class="text-gray-600 body-font">
+    <div class="container px-5 py-8 mx-auto">
+      <div class="flex flex-col text-center w-full mb-20">
+        <h1  class="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">Green Humanity</h1>
+        <p class="lg:w-2/3 mx-auto leading-relaxed text-base">
+          Welcome to "Green Humanity", where our primary purpose is to shape a prosperous future for our small-scale farmers. We recognize and understand the struggles that not-so-large landowners endure, be it fragmentation of land, lack of resources, or scarce farming knowledge. As a team passionate about rural development, we're here to reinvent the traditional farming narrative, equipping you with modern technologies and innovative farming methods that make agriculture profitable even for the smallest of plots.
+          <br>
+          How We Help
+          <br>
+          We're not your typical agricultural service. We pledge to provide genuinely transformative solutions connecting rural farmers with modern farming practices, helping them produce more with less. Our innovative approach includes:
+          <br>
+          <span class="font-semibold text-gray-900">
+          Integrated farming: </span> This is a holistic approach that allows us to use resources efficiently, thereby increasing yield and boosting your income.
+          <br>
+          <span class="font-semibold text-gray-900">
+          Drone and IoT Devices: </span> We utilize modern technology to monitor your lands, ensure efficient use of water, fertilizers, and identify problems before they become too severe.
+          <br>
+          <span class="font-semibold text-gray-900">Geographic Information System (GIS) :</span> This system helps us analyze your soil and terrain, providing precise information necessary to enhance your land's productivity and save on costs.
+          <br>
+          We cherish every farmer and landowner, big or small! We firmly believe that everyone should have a chance to reap the benefits of their land. So, whether you are searching for a way to make the most of your property or a farmer eager to gain access to more resources and modern farming techniques, we've got your back.
+          <p class="font-semibold text-gray-900">
+          Start Your Journey
+            </p>
+          Ready to transform your farming practices and achieve a higher yield? We make the process as easy as ABC. All you need to do is rent your land to us and watch your land transform before your eyes. We also offer on-the-job opportunities for those interested in working together on this journey.
+          <p class="font-semibold text-gray-900">
+          Let's Grow Together!
+          </p>
+          We're not just about farming; we're creating a community that nurtures rural growth and fights against the odds stacked against small-scale agriculture. By working with us, you're not only improving your land; you're also championing a revolution in agricultural practices that will pave the way for a more equitable and sustainable future for our rural communities.
+          <br>  
+          Join us today, and together, we'll grow more than just crops. We'll grow hope, resilience, and prosperity.
+        
+        </p>
+        <section  class="text-gray-600 body-font">
+          <div class="container px-5 py-24 mx-auto">
+            <div class="flex flex-wrap -m-4">
+              <div class="p-4  md:w-1/4">
+                <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-xl overflow-hidden" style="background-image: linear-gradient(315deg,#00BF65,#028F4B);">
+                  <div class="p-6 self-center ">
+                    <h1 class="title-font text-lg font-bold text-white ">Ag-Tech Solutions for Small Landowners                    </h1>
+                    <span class="inline-block h-1 w-20 rounded bg-white "></span>
+
+                    <p class="leading-relaxed text-white mb-3">Boost your profits and productivity with our ag-tech solutions. Just rent out your land and let us work the agricultural magic.</p>
+                   
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 h-96 md:w-1/4">
+                <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-xl overflow-hidden" style="background-image: linear-gradient(315deg,#00BF65,#028F4B);">
+                  <div class="p-6">
+                    <h1 class="title-font text-lg font-bold text-white">Transform Rural Agriculture with Us                    </h1>
+                    <span class="inline-block h-1 w-20 rounded bg-white "></span>
+                    <p class="leading-relaxed block justify-center text-white mb-3">Turning small fragmented farms into profitable ventures using drone, IoT and GIS technologies. Work with us or rent us your land.
+                    </p>
+                   
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 h-96 md:w-1/4">
+                <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-xl overflow-hidden" style="background-image: linear-gradient(315deg,#00BF65,#028F4B);">
+                  <div class="p-6">
+                    <h1 class="title-font text-lg font-bold text-white ">Modern Farming for Small Farmers                    </h1>
+                    <span class="inline-block h-1 w-20 rounded bg-white "></span>
+                    <p class="leading-relaxed text-white mb-3">Empower small farmers with modern technology and integrated farming methods, tackling land fragmentation, climate change, and resource scarcity.
+
+                    </p>
+                   
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 h-96 md:w-1/4">
+                <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-xl overflow-hidden" style="background-image: linear-gradient(315deg,#00BF65,#028F4B);">
+                  <div class="p-6">
+                    <h1 class="title-font text-lg font-bold text-white">Revolutionize Your Farming Technique                     </h1>
+                    <span class="inline-block h-1 w-20 rounded bg-white "></span>
+
+                    <p class="leading-relaxed text-white mb-3">Overcome the barriers of traditional farming! We provide modern technologies to augment yields, empowering small farmers and landowners.
+                      </p>
+                   
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+        </section>
+
+
+      </div>
+  </section>
+
+  <section class="text-gray-600">
+    <div class="container px-5 mx-auto">
+      <div class="xl:w-1/2 lg:w-3/4 w-full mx-auto text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="inline-block w-8 h-8 text-gray-400 mb-8"
+          viewBox="0 0 975.036 975.036">
+          <path
+            d="M925.036 57.197h-304c-27.6 0-50 22.4-50 50v304c0 27.601 22.4 50 50 50h145.5c-1.9 79.601-20.4 143.3-55.4 191.2-27.6 37.8-69.399 69.1-125.3 93.8-25.7 11.3-36.8 41.7-24.8 67.101l36 76c11.6 24.399 40.3 35.1 65.1 24.399 66.2-28.6 122.101-64.8 167.7-108.8 55.601-53.7 93.7-114.3 114.3-181.9 20.601-67.6 30.9-159.8 30.9-276.8v-239c0-27.599-22.401-50-50-50zM106.036 913.497c65.4-28.5 121-64.699 166.9-108.6 56.1-53.7 94.4-114.1 115-181.2 20.6-67.1 30.899-159.6 30.899-277.5v-239c0-27.6-22.399-50-50-50h-304c-27.6 0-50 22.4-50 50v304c0 27.601 22.4 50 50 50h145.5c-1.9 79.601-20.4 143.3-55.4 191.2-27.6 37.8-69.4 69.1-125.3 93.8-25.7 11.3-36.8 41.7-24.8 67.101l35.9 75.8c11.601 24.399 40.501 35.2 65.301 24.399z">
+          </path>
+        </svg>
+        <p class="leading-relaxed text-lg">
+          Project Green Humanity aims to empower farmers, enhance their agricultural practices, and contribute to a more
+          sustainable and profitable future for agriculture worldwide.
+
+        </p>
+        <span class="inline-block h-1 w-10 rounded bg-green-500 mt-8 mb-6"></span>
+        <h2 class="text-gray-900 font-medium title-font tracking-wider text-sm">Harshit Katheria</h2>
+        <p class="text-gray-500">Green Humanity web developer</p>
+      </div>
+    </div>
+  </section>
+  <footer class="text-gray-600 body-font">
+    <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
+      <a class="flex title-font font-medium items-center md:justify-start justify-center text-gray-900">
+        <img src="/images/logo1.png" class="w-20 h-20 text-white p-2  rounded-full" />
+
+        <span class="ml-3 text-xl">Green Humanity</span>
+      </a>
+      <p class="text-sm text-gray-500 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-200 sm:py-2 sm:mt-0 mt-4">© 2023
+        Green Humanity —
+        <a href="https://twitter.com/knyttneve" class="text-gray-600 ml-1" rel="noopener noreferrer"
+          target="_blank">@harshit.k</a>
+      </p>
+      <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
+        <a class="text-gray-500">
+          <svg fill="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-5 h-5"
+            viewBox="0 0 24 24">
+            <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"></path>
+          </svg>
+        </a>
+        <a class="ml-3 text-gray-500">
+          <svg fill="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-5 h-5"
+            viewBox="0 0 24 24">
+            <path
+              d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z">
+            </path>
+          </svg>
+        </a>
+        <a class="ml-3 text-gray-500">
+          <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            class="w-5 h-5" viewBox="0 0 24 24">
+            <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zm1.5-4.87h.01"></path>
+          </svg>
+        </a>
+        <a class="ml-3 text-gray-500">
+          <svg fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="0"
+            class="w-5 h-5" viewBox="0 0 24 24">
+            <path stroke="none"
+              d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"></path>
+            <circle cx="4" cy="4" r="2" stroke="none"></circle>
+          </svg>
+        </a>
+      </span>
+    </div>
+  </footer>
+
+  <script type="text/javascript" src="tw-elements/dist/js/tw-elements.umd.min.js"></script>
+
+</body>
+
+</html>
