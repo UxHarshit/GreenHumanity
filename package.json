@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@glidejs/glide": "^3.6.0",
+    "@vonage/server-sdk": "^3.10.0",
     "axios": "^1.5.0",
     "body-parser": "^1.20.2",
     "ejs": "^3.1.9",
@@ -20,8 +21,10 @@
     "mongoose": "^7.3.3",
     "node-fetch": "^3.3.2",
     "nodemon": "^3.0.1",
+    "razorpay": "^2.9.2",
     "totp-generator": "^0.0.14",
-    "tw-elements": "^1.0.0-rc.1"
+    "tw-elements": "^1.0.0-rc.1",
+    "twilio": "^4.19.3"
   },
   "devDependencies": {
     "tailwindcss": "^3.3.3"

@@ -19,6 +19,17 @@ function connectToDatabase() {
     });
   });
 }
+
+var get_areas= async () => {
+  return new Promise(async (resolve, reject) => {
+    const data = await modal.areasModel.find();
+    if(!data){
+      reject("Internal server error")
+    } else {
+      resolve(data);
+    }
+  }
+)}
 var user_exists = async (phone, password) => {
   return new Promise(async (resolve, reject) => {
     const user = await modal.usermodel.findOne({ phone: phone, password: password }).exec();
@@ -27,6 +38,27 @@ var user_exists = async (phone, password) => {
     } else {
       resolve(user);
     }
+  })
+}
+var shg_exists = async (phone, password) => {
+  return new Promise(async (resolve, reject) => {
+    const user = await modal.shgModel.findOne({ phone: phone, password: password }).exec();
+    if (!user) {
+      reject("User doesn't exists or Email and password are wrong!");
+    } else {
+      resolve(user);
+    }
+  })
+}
+var create_shg = async (phone,firstname,lastname,area,password,address,state,city,pincode) => {
+  return new Promise((resolve, reject) => {
+    const data = new modal.shgModel({"phone":phone,"firstname":firstname,"lastname":lastname,"area":area,"GW":[],"password":password,"address":address,"state":state,"city":city,"pincode":pincode});
+    const res = data.save()
+      if(!res){
+        reject("Unable to add data to user");
+      }else{
+        resolve("done");
+      }
   })
 }
 var get_users = async () => {
@@ -71,6 +103,29 @@ var addtocart = async (phone,sc) => {
     }
   })
 }
+var updateItem = async (phone,itemId,quantity) => {
+  return new Promise(async (resolve, reject) => {
+    const user = await modal.usermodel.updateOne({phone:phone,cart:{$elemMatch:{itemId:itemId}}},{$set:{"cart.$.quantity":quantity}},{upsert:true}).exec()
+
+    if (!user) {
+      reject("User doesn't exists or Email and password are wrong!");
+    } else {
+      resolve(user);
+    }
+  })
+}
+
+var removefromcart = async (phone,id) => {
+  return new Promise(async (resolve, reject) => {
+    const user = await modal.usermodel.updateOne({phone:phone},{$pull:{cart:{itemId:id}}},{upsert:true}).exec()
+
+    if (!user) {
+      reject("User doesn't exists or Email and password are wrong!");
+    } else {
+      resolve(user);
+    }
+  })
+}
 var updateCart = async (phone,sc) => {
   return new Promise(async (resolve, reject) => {
     const user = await modal.usermodel.updateOne({phone:phone},{$set:{cart:sc}},{upsert:true}).exec()
@@ -82,9 +137,19 @@ var updateCart = async (phone,sc) => {
     }
   })
 }
-var create_user = async (phone,email, password, firstname, lastname) => {
+var insertOrders = async(cart_data,billing_data,phone) => {
+  return new Promise(async (resolve, reject) => {
+    const user = await modal.usermodel.updateOne({phone:phone},{$push:{orders:{cart_data,billing_data}}},{upsert:true}).exec()
+    if (!user) {
+      reject("User doesn't exists or Email and password are wrong!");
+    } else {
+      resolve(user);
+    }
+  })
+}
+var create_user = async (phone,email, password, firstname, lastname,address,state,city,pincode ) => {
   return new Promise((resolve, reject) => {
-    const data = new modal.usermodel({"email":email,"password":password,cart:[],"phone":phone,"firstname":firstname,"lastname":lastname,"imageid":"null"});
+    const data = new modal.usermodel({"email":email,"password":password,cart:[],"phone":phone,"firstname":firstname,"lastname":lastname,"imageid":"null" ,"address":address,"state":state,"city":city,"pincode":pincode,"orders":[]});
     const res = data.save()
       if(!res){
         reject("Unable to add data to user");
@@ -93,4 +158,5 @@ var create_user = async (phone,email, password, firstname, lastname) => {
       }
   })
 }
-module.exports = { connectToDatabase, user_exists ,create_user,user_exists_phone,get_users,admin_exists_email,addtocart,updateCart};
+module.exports = { connectToDatabase, user_exists ,create_user,user_exists_phone,get_users,admin_exists_email,addtocart,updateCart,removefromcart,updateItem,insertOrders
+  ,get_areas,create_shg,shg_exists};

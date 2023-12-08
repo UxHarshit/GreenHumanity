@@ -3,49 +3,212 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cart</title>
   <link rel="stylesheet" href="../assets/cart.css">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script> 
 
+  <style>
+     input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+    .delete-email-button {
+      color: #bdc3c7;
+      transition: color 0.2s ease-in-out;
+    }
+    .delete-email-button {
+      cursor: pointer;
+    }
+
+    .delete-email-button:hover {
+      color: #e74c3c;
+    }
+  </style>
+  <script>
+    function removeWholeItem(itemId){
+      console.log(itemId)
+      fetch('/api/cart/deleteItem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          itemId: itemId
+        })
+      }).then(res => {
+        if(res.status==200){
+          window.location.reload()
+        }
+      })
+    }
+
+
+    function changeQuantity(itemId,type,quantity){
+        var quantity = parseInt(document.getElementById('item-'+itemId).value)
+        if(isNaN(quantity)){
+          quantity=0
+        }
+        if(type=='add'){
+          quantity++
+        }else if(type=='sub'){
+          quantity--
+        }
+
+        if(quantity<=0){
+          removeWholeItem(itemId)
+          return
+        }
+        fetch('/api/cart/changeQuantity', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            itemId: itemId,
+            quantity: quantity
+          })
+        }).then(res => {
+          if(res.status==200){
+            window.location.reload()
+          }
+        })
+      }
+
+      function createOrder(amount){
+        fetch('/api/razorpay/createOrder',{
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            amount: amount
+
+          })
+        }).then(res=>res.json()).then(data=>{
+          console.log(data)
+          var options = {
+            "key": data.key_id, // Enter the Key ID generated from the Dashboard
+            "amount": data.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+            "currency": data.currency,
+            "name": "Green Humanity",
+            "description": "Test Transaction",
+            "image": "/images/logo.png",
+            "order_id": data.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+            "handler": function (response){
+              let orderID = response.razorpay_order_id;
+              let transactionID = response.razorpay_payment_id;
+              window.location.href = "/payment/success?orderID="+orderID+"&transactionID="+transactionID+"&amount="+amount;
+            },
+            "prefill": {
+                "name": "<%=billing_details.name%>",
+                "email": "<%=billing_details.email%>",
+                "contact": "<%=billing_details.phone%>"
+            },
+            "notes": {
+                "address": "<%=billing_details.address%>"
+            },
+            "theme": {
+                "color": "#0E9F6E"
+            }
+        };
+        var rzp1 = new Razorpay(options);
+        rzp1.on('payment.failed', function (response){
+            console.log(response)
+            alert("Payment Failed ");
+        });
+        rzp1.open();
+
+        })        
+      }
+
+  </script>
 </head>
 
 <body>
-    <section class="text-gray-600 body-font">
-      <div class="container px-5 py-24 mx-auto">
-        <div class="flex flex-col text-center w-full mb-20">
-          <h1 class="sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">Your cart</h1>
-          <p class="lg:w-2/3 mx-auto leading-relaxed text-base">your personal cart,<% if(Object.entries(data).length == 0) { %> empty :( add something <%} else {%>please check it before proceding<%}%> </p>
+  <section class="text-gray-600 body-font">
+    <div class="container px-5 py-24 mx-auto">
+      <div class="flex flex-col text-center w-full mb-20">
+        <h1 class="sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">Your cart</h1>
+        <p class="lg:w-2/3 mx-auto leading-relaxed text-base">your personal cart,<% if(Object.entries(data).length==0) {
+            %> empty :( add something <%} else {%>please check it before proceding<%}%>
+        </p>
+      </div>
+      <div class="flex flex-wrap">
+        <div class="h-full p-6 rounded-lg border-2 border-indigo-500 flex flex-col relative overflow-hidden">
+          <span
+            class="bg-green-500 text-white px-3 py-1 tracking-widest text-xs absolute right-0 top-0 rounded-bl"> Billing Details</span>
+          <h2 class="tracking-widest title-font mb-1 font-bold text-base text-black uppercase"><%= billing_details.name %></h2>
+          <h1 class="text-5xl text-gray-900 leading-none flex items-center pb-4 mb-4 border-b border-gray-200">
+            <span class="text-sm ml-1 font-light text-gray-500"><%= billing_details.phone %></span>
+          </h1>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="text-black font-semibold">Address : </span> &nbsp; 
+            <%= billing_details.address %>
+          </p>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="text-black font-semibold"> City : </span> &nbsp;<%= billing_details.city %>
+          </p>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="text-black font-semibold"> State :</span> &nbsp;<%= billing_details.state %>
+          </p>
+          <p class="flex items-center text-gray-600 mb-6">
+           <span class="text-black font-semibold"> Pincode :</span> &nbsp;<%= billing_details.pincode %>
+          </p>
+          <div
+            class="flex items-center mt-auto text-white bg-green-500 border-0 py-2 px-4 w-full rounded">By Secure gateway UPI
+            <svg fill="#ffffff" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              class="w-4 h-4 ml-auto" viewBox="0 0 330 330">
+              <g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="XMLID_486_"> <path id="XMLID_487_" d="M165,330c63.411,0,115-51.589,115-115c0-29.771-11.373-56.936-30-77.379V85c0-46.869-38.131-85-85-85 S80.001,38.131,80.001,85v52.619C61.373,158.064,50,185.229,50,215C50,278.411,101.589,330,165,330z M180,219.986V240 c0,8.284-6.716,15-15,15s-15-6.716-15-15v-20.014c-6.068-4.565-10-11.824-10-19.986c0-13.785,11.215-25,25-25s25,11.215,25,25 C190,208.162,186.068,215.421,180,219.986z M110.001,85c0-30.327,24.673-55,54.999-55c30.327,0,55,24.673,55,55v29.029 C203.652,105.088,184.91,100,165,100c-19.909,0-38.651,5.088-54.999,14.028V85z"></path> </g> </g>
+            </svg>
+          </div>
+          <p class="text-xs text-gray-500 mt-3">make sure billing details are correct</p>
         </div>
-        <div class="lg:w-2/3 w-full mx-auto overflow-auto">
-          <table class="table-auto w-full text-left whitespace-no-wrap">
-            <thead>
-              <tr>
-                <th
-                  class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">
-                  Item</th>
-                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">Quantity
-                </th>
-                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">Price</th>
-                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">Remove</th>
-
-                <th
-                  class="w-10 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tr rounded-br">
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <% var total = 0;%>
+      <div class="lg:w-2/3 w-full mx-auto overflow-x-scroll">
+        <table class="table-auto w-full text-left whitespace-no-wrap">
+          <thead>
+            <tr>
+              <th
+                class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">
+                Item</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">Quantity
+              </th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">Price</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">Remove
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <% var total=0;%>
               <% Object.entries(data).forEach(([index,{name,itemId,quantity,price}])=>{ %>
                 <tr>
                   <td class="px-4 py-3">
                     <%= name%>
                   </td>
                   <td class="px-4 py-3">
-                    <%= quantity%>
+                    <div class="flex ">
+                      <svg role="button" onclick="changeQuantity(this.getAttribute('data-te-index'),'sub')" data-te-index="<%=itemId%>" class="fill-current text-gray-600 w-3" viewBox="0 0 448 512"><path d="M416 208H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z"/>
+                      </svg>
+                      <input type="number" id="item-<%=itemId%>" class="mx-2 bg-gray-100 border rounded-xl text-center w-12" type="text" value="<%= quantity%>">
+                      <script>
+                        var element = document.getElementById('item-'+'<%=itemId%>');
+                        element.addEventListener('change', function() {
+                          changeQuantity('<%=itemId%>', 'change')
+                        });
+                      </script> 
+                      <svg role="button" onclick="changeQuantity(this.getAttribute('data-te-index'),'add')" data-te-index="<%=itemId%>" class="fill-current text-gray-600 w-3" viewBox="0 0 448 512">
+                        <path d="M416 208H272V64c0-17.67-14.33-32-32-32h-32c-17.67 0-32 14.33-32 32v144H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h144v144c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32V304h144c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z"/>
+                      </svg>
+                    </div>
                   </td>
                   <td class="px-4 py-3">
                     <%= price*quantity %>
-                    <% total = total + price*quantity%> 
+                      <% total=total + price*quantity%>
                   </td>
                   <td class="px-4 py-3 text-lg text-gray-900">
-                    <a role="button" class="delete-email-button text-neutral-300 ms-2" data-te-index="${i}">
+                    <a role="button" onclick="removeWholeItem(this.getAttribute('data-te-index'))" class="delete-email-button text-neutral-300 ms-2" data-te-index="<%=itemId%>">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -56,22 +219,25 @@
                 </tr>
                 <% }); %>
 
-            </tbody>
-          </table>
-        </div>
-        <div class="flex pl-4 mt-4 lg:w-2/3 w-full mx-auto">
-          <a href="./home" class="text-green-500 inline-flex items-center md:mb-2 lg:mb-0">Continue shopping
-            <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              class="w-4 h-4 ml-2" viewBox="0 0 24 24">
-              <path d="M5 12h14M12 5l7 7-7 7"></path>
-            </svg>
-          </a>
-          <% if(total> 0){%>
-          <button
-            class="flex ml-auto text-white bg-green-500 border-0 py-2 px-6 focus:outline-none hover:bg-green-600 rounded">Place
-            Order Rs. <%=total%></button>
-          <%}%>
-        </div>
+          </tbody>
+        </table>
       </div>
-    </section>
+    </div>
+
+    <div class="flex pl-4 mt-4 lg:w-2/3 w-full mx-auto">
+      <a href="./home" class="text-green-500 inline-flex items-center md:mb-2 lg:mb-0">Continue shopping
+        <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          class="w-4 h-4 ml-2" viewBox="0 0 24 24">
+          <path d="M5 12h14M12 5l7 7-7 7"></path>
+        </svg>
+      </a>
+      <% if(total> 0){%>
+        <button
+          onclick="createOrder('<%=total%>')"
+          class="flex ml-auto text-white bg-green-500 border-0 py-2 px-6 focus:outline-none hover:bg-green-600 rounded">Place
+          Order Rs. <%=total%></button>
+        <%}%>
+    </div>
+    </div>
+  </section>
 </body>
