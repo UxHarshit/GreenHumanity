@@ -3,15 +3,24 @@ const totp = require('totp-generator');
 const Razorpay = require('razorpay')
 const crypto = require('crypto')
 const { cart } = require('./modals');
+const multer = require('multer');
 const accountSid = 'AC8da6e5392095e5d9b8021e1943daf8d8';
 const authToken = '87337b6fa901b2455c008a98c2e8365f';
 const client = require('twilio')(accountSid, authToken);
 
 const instance = new Razorpay({
     key_id: 'rzp_test_oMXBC2tF5aHVl3',
-    key_secret : 'WvazGcOW0VzaD5bxKYcuXHQR'
+    key_secret: 'WvazGcOW0VzaD5bxKYcuXHQR'
 })
+// Set up Multer to handle file uploads
+const storage = multer.diskStorage({
+    destination: 'uploads/', // Folder where files will be saved
+    filename: function (req, file, cb) {
+        cb(null, `${req.body.phone}_${file.originalname}`); // Keep the original filename
+    },
+});
 
+const upload = multer({ storage: storage });
 
 async function sendSMS(to, from, text) {
     client.messages
@@ -24,6 +33,196 @@ async function sendSMS(to, from, text) {
 }
 function routes(app) {
 
+    app.get('/app/shg/:id/products', (req, res) => {
+        if (!req.session.isLoggedIn) {
+            res.redirect('/login')
+            return
+        }
+        const id = req.params.id
+        db.get_shg(id).then((data) => {
+            res.status(200).render('products', { data: JSON.stringify(data.products), id: id })
+        }).catch((err) => {
+            res.status(404).json({ "error": "Not found" });
+            console.log(err)
+        })
+    })
+    app.get('/app/shg/:id/inventory', (req, res) => {
+        if (!req.session.isLoggedIn) {
+            res.redirect('/login')
+            return
+        }
+        const id = req.params.id
+        db.get_shg(id).then((data) => {
+            res.status(200).render('inventory', { data: JSON.stringify(data.inventory), id: id })
+        }).catch((err) => {
+            res.status(404).json({ "error": "Not found" });
+            console.log(err)
+        })
+    })
+
+
+    app.get('/app/shg/:id/products/add', (req, res) => {
+        if (!req.session.isLoggedIn) {
+            res.redirect('/login')
+            return
+        }
+        const id = req.params.id
+        const name = req.query.name
+        const quantity = req.query.quantity
+        const description = req.query.description
+        if (name == null || name.length < 2 || quantity == null || quantity.length < 1 || isNaN(quantity) || description == null || description.length < 2) {
+            res.status(400).json({ "error": "bad request" });
+            return;
+        }
+        db.get_shg(id).then((data) => {
+          
+            db.create_shg_products(id, name, quantity, description).then((data) => {
+                db.update_shg_products_history(id, name, quantity, description, "added").then((data) => {
+                    res.redirect(`/app/shg/${id}/products`)
+                }).catch((err) => {
+                    res.status(404).json({ "error": "Not found" });
+                    console.log(err)
+                })
+            }).catch((err) => {
+                res.status(404).json({ "error": "Not found" });
+                console.log(err)
+            })
+        })
+    })
+    app.get('/app/shg/:id/products/edit', (req, res) => {
+        if (!req.session.isLoggedIn) {
+            res.redirect('/login')
+            return
+        }
+        const id = req.params.id
+        const name = req.query.name
+        const quantity = req.query.quantity
+        const description = req.query.description
+        if (name == null || name.length < 2 || quantity == null || quantity.length < 1 || isNaN(quantity) || description == null || description.length < 2) {
+            res.status(400).json({ "error": "bad request" });
+            return;
+        }
+        db.get_shg(id).then((data) => {
+            var exists = data.products.find(o => o.name == name);
+            if (!exists) { res.status(400).json({ "error": "bad request" }); return; }
+            db.get_shg(id).then((data) => {
+                var exists = data.products.find(o => o.name == name);
+                if (!exists) { res.status(400).json({ "error": "bad request" }); return; }
+                db.update_shg_products(id, name, quantity, description).then((data) => {
+                    db.update_shg_products_history(id, name, quantity, description, "updated").then((data) => {
+                        res.redirect(`/app/shg/${id}/products`)
+                    }).catch((err) => {
+                        res.status(404).json({ "error": "Not found" });
+                        console.log(err)
+                    })
+                }).catch((err) => {
+                    res.status(404).json({ "error": "Not found" });
+                    console.log(err)
+                })
+            }).catch((err) => {
+                res.status(404).json({ "error": "Not found" });
+                console.log(err)
+            })
+        })
+    })
+    app.get('/app/shg/:id/products/:name/delete', (req, res) => {
+        if (!req.session.isLoggedIn) {
+            res.redirect('/login')
+            return
+        }
+        const id = req.params.id
+        const name = req.params.name
+        db.get_shg(id).then((data) => {
+            var exists = data.products.find(o => o.name == name);
+            if (!exists) { res.status(400).json({ "error": "bad request" }); return; }
+            db.delete_shg_products(id, name).then((data) => {
+                db.update_shg_products_history(id, name, exists.quantity, exists.description, "deleted").then((data) => {
+                    res.redirect(`/app/shg/${id}/products`)
+                }).catch((err) => {
+                    res.status(404).json({ "error": "Not found" });
+                    console.log(err)
+                })
+            }).catch((err) => {
+                res.status(404).json({ "error": "Not found" });
+                console.log(err)
+            })
+
+        })
+    })
+    app.get('/app/shg/:id/products/history', (req, res) => {
+        if (!req.session.isLoggedIn) {
+            res.redirect('/login')
+            return
+        }
+        const id = req.params.id
+        db.get_shg(id).then((data) => {
+            res.status(200).render('products_history', { data: JSON.stringify(data.products_history), id: id })
+        }).catch((err) => {
+            res.status(404).json({ "error": "Not found" });
+            console.log(err)
+        })
+    })
+
+    app.get('/app/shg/:id/revenue', (req, res) => {
+        if (!req.session.isLoggedIn) {
+            res.redirect('/login')
+            return
+        }
+        const id = req.params.id
+        db.get_shg(id).then((data) => {
+            res.status(200).render('revenue', { data: JSON.stringify(data.revenue), id: id })
+        }).catch((err) => {
+            res.status(404).json({ "error": "Not found" });
+            console.log(err)
+        })
+    })
+
+    app.get('/app/shg/:id/revenue/history', (req, res) => {
+        if (!req.session.isLoggedIn) {
+            res.redirect('/login')
+            return
+        }
+        const id = req.params.id
+        db.get_shg(id).then((data) => {
+            res.status(200).render('revenue_history', { data: JSON.stringify(data.revenue_history), id: id })
+        }).catch((err) => {
+            res.status(404).json({ "error": "Not found" });
+            console.log(err)
+        })
+    })
+
+    app.get('/app/shg/:id/revenue/add', (req, res) => {
+        if(!req.session.isLoggedIn){
+            res.redirect('/login')
+            return
+        }
+
+        const id = req.params.id
+        const amount = req.query.amount
+        const description = req.query.description
+        const date = req.query.date
+        const status = req.query.status
+        console.log(id,amount,description,status)
+        if (amount == null || amount.length < 1 || isNaN(amount) || description == null || description.length < 2) {
+            res.status(400).json({ "error": "bad request" });
+            return;
+        }
+        db.get_shg(id).then((data) => {
+            db.create_shg_revenue(id,description, amount, status,date).then((data) => {
+                db.update_shg_revenue_history(id, amount, description, status,date).then((data) => {
+                    res.redirect(`/app/shg/${id}/revenue`)
+                }).catch((err) => {
+                    res.status(404).json({ "error": "Not found" });
+                    console.log(err)
+                })
+            }).catch((err) => {
+                res.status(404).json({ "error": "Not found" });
+                console.log(err)
+            })
+        })
+        
+
+    })
     app.post('/api/razorpay/verifyPayment', (req, res) => {
         const payment_id = req.body.payment_id;
         const order_id = req.body.order_id;
@@ -57,8 +256,8 @@ function routes(app) {
                 "city": data.city,
                 "pincode": data.pincode,
                 "phone": data.phone,
-                "orderId" : order_id,
-                "transactionId" : transaction_id,
+                "orderId": order_id,
+                "transactionId": transaction_id,
             }
             data.cart.forEach(element => {
 
@@ -75,12 +274,12 @@ function routes(app) {
                 res.status(400).json({ "error": "Bad request" });
             } else {
                 //res.status(200).render('success', { data: cart_data, billing_details: billing_details,order_id:order_id,transaction_id:transaction_id,amount:amount });
-                db.insertOrders(cart_data,billing_details,req.session.phone).then((result) => {
+                db.insertOrders(cart_data, billing_details, req.session.phone).then((result) => {
                     const from = 'Vonage APIs'
-                    const to = "+91"+billing_details.phone
+                    const to = "+91" + billing_details.phone
                     const message = `Green Humanity, Your order has been placed successfully, your order id is ${order_id}, transaction id is ${transaction_id} and amount is ${amount}. Thank you for shopping with us.`
                     sendSMS(to, from, message)
-                    res.status(200).render('success', { data: cart_data, billing_details: billing_details,order_id:order_id,transaction_id:transaction_id,amount:amount });
+                    res.status(200).render('success', { data: cart_data, billing_details: billing_details, order_id: order_id, transaction_id: transaction_id, amount: amount });
                     res.end()
 
                 }).catch((err) => {
@@ -95,7 +294,7 @@ function routes(app) {
             res.end()
         })
     })
-        
+
 
 
     app.post('/api/razorpay/createOrder', (req, res) => {
@@ -105,7 +304,7 @@ function routes(app) {
         const currency = "INR"
         const notes = {
             description: req.body.description,
-            phone: phone   
+            phone: phone
         }
         if (phone == null || phone.length < 2 || password == null || password.length < 6 || amount == null || amount.length < 1 || isNaN(amount)) {
             res.status(400).send({ response: "Bad request" });
@@ -154,9 +353,9 @@ function routes(app) {
             req.session.phone = phone
             req.session.password = password
 
-            var userData = { 
+            var userData = {
                 email: data.email,
-                phone : data.phone, 
+                phone: data.phone,
                 name: `${data.firstname} ${data.lastname}`,
                 address: `${data.address},\n${data.city},\n${data.state},\n${data.pincode}`,
             }
@@ -168,7 +367,7 @@ function routes(app) {
             res.redirect('/login')
             res.end()
         })
-       
+
     });
     app.post('/api/user/deletecart', function (req, res) {
         const phone = req.session.phone;
@@ -253,7 +452,7 @@ function routes(app) {
                 } else {
                     var index = data.cart.findIndex(o => o.itemId == id)
 
-                    db.updateItem(req.session.phone, id,quantity).then((result) => {
+                    db.updateItem(req.session.phone, id, quantity).then((result) => {
                         data.cart[index].name = exists.name;
                         res.status(200).json(data.cart[index]);
 
@@ -351,7 +550,7 @@ function routes(app) {
             if (data == undefined) {
                 res.status(400).json({ "error": "bad request" });
             } else {
-                db.removefromcart(req.session.phone,id, []).then((result) => {
+                db.removefromcart(req.session.phone, id, []).then((result) => {
                     res.status(200).json({ "message": "Cart deleted" });
 
                 }).catch((err) => {
@@ -437,25 +636,44 @@ function routes(app) {
     })
 
     app.get('/admin/register_shg', function (req, res) {
-        if(req.session.adminIsLoggedIn){
+        if (req.session.adminIsLoggedIn) {
             db.get_areas().then((data) => {
                 var area_map = []
                 data.forEach(element => {
-                    area_map.push({ name: element.name});
+                    area_map.push({ name: element.name });
                 });
                 res.status(200).render('registerSHG', { data: area_map });
             }).catch((err) => {
                 res.status(500).json({ "message": "Internal server error" });
                 console.log(err)
             })
-        } else 
-        {
+        } else {
             res.redirect('/admin/login')
         }
     })
     app.get('/app/shg_home', async (req, res) => {
-        res.render('shg_home')
-        res.end()
+        if (req.session.isLoggedIn) {
+            var phone = req.session.phone
+            var password = req.session.password
+            if (phone == null || phone.length < 2 || password == null || password.length < 6) {
+                res.redirect('/login')
+                return
+            }
+            db.user_exists(phone, password).then((data) => {
+                req.session.isLoggedIn = true
+                req.session.phone = phone
+                req.session.password = password
+                res.status(200).render('shg_home', { "firstname": data.firstname, "lastname": data.lastname, "address": data.address, "state": data.state, "city": data.city, "pincode": data.pincode, "phone": data.phone })
+
+            }).catch((err) => {
+                req.session.isLoggedIn = false
+                res.redirect('/login')
+                res.end()
+            })
+        } else {
+            res.redirect('/login')
+        }
+
     })
     app.get('/app/frm_home', async (req, res) => {
         res.render('frm_home')
@@ -474,10 +692,10 @@ function routes(app) {
             }
         }
     });
-    app.post('/api/auth/register/sgh',async (req, res) => {
-        if(!req.session.adminIsLoggedIn){
+    app.post('/api/auth/register/sgh', async (req, res) => {
+        if (!req.session.adminIsLoggedIn) {
             res.redirect('/admin/login')
-            
+
             return
         }
         const name = req.body.fullname;
@@ -493,7 +711,7 @@ function routes(app) {
         db.shg_exists(phone).then((data) => {
             res.status(409).json({ error: 409, message: "SHG already exists" });
         }).catch((err) => {
-            db.create_shg(phone,firstname,lastname,area,password,address,req.body.state,req.body.city,req.body.pincode).then((data) => {
+            db.create_shg(phone, firstname, lastname, area, password, address, req.body.state, req.body.city, req.body.pincode).then((data) => {
                 res.status(200).json({ "message": "SHG registered successful" })
             }).catch((err) => {
                 res.status(500).json({ "message": "Internal server error" });
@@ -517,7 +735,7 @@ function routes(app) {
         db.get_users().then((data) => {
             var user_map = []
             data.forEach(element => {
-                user_map.push({ firstname: element.firstname, lastname: element.lastname, email: (element.email == "null")? "N/A" :element.email, phone: element.phone });
+                user_map.push({ firstname: element.firstname, role: element.role, verified: element.verified, address: element.address, lastname: element.lastname, email: (element.email == "null") ? "N/A" : element.email, phone: element.phone });
             });
             res.status(200).json(user_map);
         }).catch((err) => {
@@ -554,7 +772,13 @@ function routes(app) {
 
     app.get('/', function (req, res) {
         if (req.session.isLoggedIn) {
-            res.redirect('/home');
+            if (req.session.role == "Consumer") {
+                res.redirect('/home');
+            } else if (req.session.role == "SHG") {
+                res.redirect('/app/shg_home')
+            } else if (req.session.role == "Farmer") {
+                res.redirect('/app/frm_home')
+            }
         } else {
             res.redirect('/landing')
         }
@@ -573,7 +797,7 @@ function routes(app) {
             req.session.isLoggedIn = true
             req.session.phone = phone
             req.session.password = password
-            res.status(200).json({ email: data.email,phone : data.phone, firstname: data.firstname, lastname: data.lastname, imageid: data.imageid });
+            res.status(200).json({ email: data.email, phone: data.phone, firstname: data.firstname, lastname: data.lastname, imageid: data.imageid });
             res.end()
         }).catch((err) => {
             req.session.isLoggedIn = false
@@ -639,8 +863,14 @@ function routes(app) {
             req.session.isLoggedIn = true
             req.session.phone = phone
             req.session.password = password
-            res.status(200).json({ email: data.email, phone: data.phone, firstname: data.firstname, lastname: data.lastname, imageid: data.imageid });
-            res.end()
+            if (data.verified == false) {
+                res.status(401).json({ response: "Unauthorised" });
+                res.end()
+            } else {
+                req.session.role = data.role
+                res.status(200).json({ email: data.email, phone: data.phone, firstname: data.firstname, lastname: data.lastname, imageid: data.imageid, role: data.role });
+                res.end()
+            }
         }).catch((err) => {
             res.status(401).json({ response: "Unauthorised" });
             res.end()
@@ -671,9 +901,14 @@ function routes(app) {
             console.log(err)
         })
     });
-    app.post('/api/auth/register', (req, res) => {
+    app.post('/api/auth/register', upload.single('certificate'), (req, res) => {
         const email = req.body.email.trim().toLowerCase();
         const password = req.body.password.trim();
+        const role = req.body.type
+        var verified = false
+        if (role == "Consumer") {
+            verified = true
+        }
         const [firstname, lastname] = (req.body.fullname.trim().includes(" ") ? req.body.fullname.trim().split(" ", 2) : ("", ""))
         const phone = req.body.phone.trim()
         if (email == null || email.length < 2 || password == null || password.length < 6 || firstname == null || firstname.length < 1 || lastname.length < 1 || lastname == null || phone.length < 10 || phone == null) {
@@ -683,7 +918,7 @@ function routes(app) {
         db.user_exists_phone(phone).then((data) => {
             res.status(409).json({ error: 409, message: "User already exists" });
         }).catch((err) => {
-            db.create_user(phone, email, password, firstname, lastname,req.body.address,req.body.state,req.body.city).then((data) => {
+            db.create_user(phone, email, password, firstname, lastname, req.body.address, req.body.state, req.body.city, req.body.pincode, req.body.education, req.body.graduation, req.body.type, verified).then((data) => {
                 res.status(200).json({ "message": "User registered successful" })
             }).catch((err) => {
                 res.status(500).json({ "message": "Internal server error" });

@@ -5,6 +5,8 @@ const User = new mongoose.Schema({
     email: String,
     password: String,
     phone : String,
+    verified : Boolean,
+    role: String,
     cart: Array,
     orders: Array,
     address: String,
@@ -12,7 +14,23 @@ const User = new mongoose.Schema({
     city: String,
     pincode: String,
     imageid: String,
+    education: String,
+    graduation: String,
+    
 }, { timestamps: true });
+
+const Shgdata = new mongoose.Schema({
+    products_history : Array,
+    revenue_history : Array,
+    deleted_inventory : Array,
+    phone : String,
+    inventory : Array,
+    revenue : Array,
+    request : Array,
+    farmer : Array,
+    products : Array,
+}, { timestamps: true });
+    
 const Admin = new mongoose.Schema({
     firstname: String,
     lastname: String,
@@ -68,6 +86,7 @@ const usermodel = mongoose.model("User", User,"users");
 const adminmodel = mongoose.model("Admin", User,"admins");
 const areasModel = mongoose.model("Areas", Areas,"areas");
 const shgModel = mongoose.model("Shgs", Shgs,"shgs");
+const shgdataModel = mongoose.model("Shgdata", Shgdata,"shgdata");
 
-module.exports = { usermodel,adminmodel ,shgModel,areasModel,cart}
+module.exports = { usermodel,adminmodel ,shgModel,areasModel,cart,shgdataModel}
 

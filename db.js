@@ -20,16 +20,17 @@ function connectToDatabase() {
   });
 }
 
-var get_areas= async () => {
+var get_areas = async () => {
   return new Promise(async (resolve, reject) => {
     const data = await modal.areasModel.find();
-    if(!data){
+    if (!data) {
       reject("Internal server error")
     } else {
       resolve(data);
     }
   }
-)}
+  )
+}
 var user_exists = async (phone, password) => {
   return new Promise(async (resolve, reject) => {
     const user = await modal.usermodel.findOne({ phone: phone, password: password }).exec();
@@ -50,21 +51,21 @@ var shg_exists = async (phone, password) => {
     }
   })
 }
-var create_shg = async (phone,firstname,lastname,area,password,address,state,city,pincode) => {
+var create_shg = async (phone, firstname, lastname, area, password, address, state, city, pincode) => {
   return new Promise((resolve, reject) => {
-    const data = new modal.shgModel({"phone":phone,"firstname":firstname,"lastname":lastname,"area":area,"GW":[],"password":password,"address":address,"state":state,"city":city,"pincode":pincode});
+    const data = new modal.shgModel({ "phone": phone, "firstname": firstname, "lastname": lastname, "area": area, "GW": [], "password": password, "address": address, "state": state, "city": city, "pincode": pincode });
     const res = data.save()
-      if(!res){
-        reject("Unable to add data to user");
-      }else{
-        resolve("done");
-      }
+    if (!res) {
+      reject("Unable to add data to user");
+    } else {
+      resolve("done");
+    }
   })
 }
 var get_users = async () => {
   return new Promise(async (resolve, reject) => {
     const data = await modal.usermodel.find();
-    if(!data){
+    if (!data) {
       reject("Internal server error")
     } else {
       resolve(data);
@@ -73,7 +74,7 @@ var get_users = async () => {
 }
 var user_exists_phone = async (phone) => {
   return new Promise(async (resolve, reject) => {
-    const user = await modal.usermodel.findOne({ phone: phone}).exec();
+    const user = await modal.usermodel.findOne({ phone: phone }).exec();
     if (!user) {
       reject("User doesn't exists or Email and password are wrong!");
     } else {
@@ -83,7 +84,7 @@ var user_exists_phone = async (phone) => {
 }
 var admin_exists_email = async (email) => {
   return new Promise(async (resolve, reject) => {
-    const user = await modal.adminmodel.findOne({ email: email}).exec();
+    const user = await modal.adminmodel.findOne({ email: email }).exec();
 
     if (!user) {
       reject("User doesn't exists or Email and password are wrong!");
@@ -92,9 +93,9 @@ var admin_exists_email = async (email) => {
     }
   })
 }
-var addtocart = async (phone,sc) => {
+var addtocart = async (phone, sc) => {
   return new Promise(async (resolve, reject) => {
-    const user = await modal.usermodel.updateOne({phone:phone},{$push:{cart:sc}},{upsert:true}).exec()
+    const user = await modal.usermodel.updateOne({ phone: phone }, { $push: { cart: sc } }, { upsert: true }).exec()
 
     if (!user) {
       reject("User doesn't exists or Email and password are wrong!");
@@ -103,9 +104,9 @@ var addtocart = async (phone,sc) => {
     }
   })
 }
-var updateItem = async (phone,itemId,quantity) => {
+var updateItem = async (phone, itemId, quantity) => {
   return new Promise(async (resolve, reject) => {
-    const user = await modal.usermodel.updateOne({phone:phone,cart:{$elemMatch:{itemId:itemId}}},{$set:{"cart.$.quantity":quantity}},{upsert:true}).exec()
+    const user = await modal.usermodel.updateOne({ phone: phone, cart: { $elemMatch: { itemId: itemId } } }, { $set: { "cart.$.quantity": quantity } }, { upsert: true }).exec()
 
     if (!user) {
       reject("User doesn't exists or Email and password are wrong!");
@@ -115,9 +116,9 @@ var updateItem = async (phone,itemId,quantity) => {
   })
 }
 
-var removefromcart = async (phone,id) => {
+var removefromcart = async (phone, id) => {
   return new Promise(async (resolve, reject) => {
-    const user = await modal.usermodel.updateOne({phone:phone},{$pull:{cart:{itemId:id}}},{upsert:true}).exec()
+    const user = await modal.usermodel.updateOne({ phone: phone }, { $pull: { cart: { itemId: id } } }, { upsert: true }).exec()
 
     if (!user) {
       reject("User doesn't exists or Email and password are wrong!");
@@ -126,9 +127,9 @@ var removefromcart = async (phone,id) => {
     }
   })
 }
-var updateCart = async (phone,sc) => {
+var updateCart = async (phone, sc) => {
   return new Promise(async (resolve, reject) => {
-    const user = await modal.usermodel.updateOne({phone:phone},{$set:{cart:sc}},{upsert:true}).exec()
+    const user = await modal.usermodel.updateOne({ phone: phone }, { $set: { cart: sc } }, { upsert: true }).exec()
 
     if (!user) {
       reject("User doesn't exists or Email and password are wrong!");
@@ -137,9 +138,9 @@ var updateCart = async (phone,sc) => {
     }
   })
 }
-var insertOrders = async(cart_data,billing_data,phone) => {
+var insertOrders = async (cart_data, billing_data, phone) => {
   return new Promise(async (resolve, reject) => {
-    const user = await modal.usermodel.updateOne({phone:phone},{$push:{orders:{cart_data,billing_data}}},{upsert:true}).exec()
+    const user = await modal.usermodel.updateOne({ phone: phone }, { $push: { orders: { cart_data, billing_data } } }, { upsert: true }).exec()
     if (!user) {
       reject("User doesn't exists or Email and password are wrong!");
     } else {
@@ -147,16 +148,99 @@ var insertOrders = async(cart_data,billing_data,phone) => {
     }
   })
 }
-var create_user = async (phone,email, password, firstname, lastname,address,state,city,pincode ) => {
+
+var get_shg = async (phone) => {
+  return new Promise(async (resolve, reject) => {
+    const user = await modal.shgdataModel.findOne({ phone: phone }).exec()
+    if (!user) {
+      reject("User doesn't exists or Email and password are wrong!");
+    } else {
+      resolve(user);
+    }
+  })
+}
+
+var update_shg_revenue_history = async (phone, amount, description, status,date) => {
+  return new Promise(async (resolve, reject) => {
+    const user = await modal.shgdataModel.updateOne({ phone: phone }, { $push: { revenue_history: { description: description, amount: amount,  status: status,date:date } } }, { upsert: true }).exec()
+    if (!user) {
+      reject("User doesn't exists or Email and password are wrong!");
+    } else {
+      resolve(user);
+    }
+  })
+}
+var create_shg_revenue = async (phone,description, amount,status,date) => {
+  return new Promise(async (resolve, reject) => {
+    const user = await modal.shgdataModel.updateOne({ phone: phone }, { $push: { revenue: {detail: description, amount: amount ,status:status ,date:date} } }, { upsert: true }).exec()
+    if (!user) {
+      reject("User doesn't exists or Email and password are wrong!");
+    } else {
+      resolve(user);
+
+    }
+  })
+}
+
+var update_shg_products_history = async (phone, name, quantity, description, status) => {
+  return new Promise(async (resolve, reject) => {
+    const user = await modal.shgdataModel.updateOne({ phone: phone }, { $push: { products_history: { name: name, quantity: quantity, description: description, status: status } } }, { upsert: true }).exec()
+    if (!user) {
+      reject("User doesn't exists or Email and password are wrong!");
+    } else {
+      resolve(user);
+    }
+  })
+}
+
+var delete_shg_products = async (phone, name) => {
+  return new Promise(async (resolve, reject) => {
+    const user = await modal.shgdataModel.updateOne({ phone: phone }, { $pull: { products: { name: name } } }, { upsert: true }).exec()
+    if (!user) {
+      reject("User doesn't exists or Email and password are wrong!");
+    } else {
+
+      resolve(user);
+
+    }
+  })
+}
+var update_shg_products = async (phone, name, quantity, description) => {
+  return new Promise(async (resolve, reject) => {
+    const user = await modal.shgdataModel.updateOne({ phone: phone, products: { $elemMatch: { name: name } } }, { $set: { "products.$.quantity": quantity, "products.$.description": description } }, { upsert: true }).exec()
+    if (!user) {
+      reject("User doesn't exists or Email and password are wrong!");
+    } else {
+
+      resolve(user);
+    }
+})
+}
+
+var create_shg_products = async (phone, name, quantity, description) => {
+  return new Promise(async (resolve, reject) => {
+    const user = await modal.shgdataModel.updateOne({ phone: phone }, { $push: { products: { name: name, quantity: quantity, description: description } } }, { upsert: true }).exec()
+    if (!user) {
+      reject("User doesn't exists or Email and password are wrong!");
+    } else {
+      resolve(user);
+
+    }
+  })
+}
+
+var create_user = async (phone, email, password, firstname, lastname, address, state, city, pincode, education, graduation, role, verified) => {
   return new Promise((resolve, reject) => {
-    const data = new modal.usermodel({"email":email,"password":password,cart:[],"phone":phone,"firstname":firstname,"lastname":lastname,"imageid":"null" ,"address":address,"state":state,"city":city,"pincode":pincode,"orders":[]});
+    const data = new modal.usermodel({ "email": email, "password": password, cart: [], "phone": phone, "firstname": firstname, "lastname": lastname, "imageid": "null", "address": address, "state": state, "city": city, "pincode": pincode, "orders": [], "education": education, "graduation": graduation, "role": role, "verified": verified });
     const res = data.save()
-      if(!res){
-        reject("Unable to add data to user");
-      }else{
-        resolve("done");
-      }
+    if (!res) {
+      reject("Unable to add data to user");
+    } else {
+      resolve("done");
+    }
   })
 }
-module.exports = { connectToDatabase, user_exists ,create_user,user_exists_phone,get_users,admin_exists_email,addtocart,updateCart,removefromcart,updateItem,insertOrders
-  ,get_areas,create_shg,shg_exists};
+module.exports = {
+  connectToDatabase, user_exists, create_user, user_exists_phone, get_users, admin_exists_email, addtocart, updateCart, removefromcart, updateItem, insertOrders
+  , get_areas, create_shg, shg_exists, get_shg, delete_shg_products,create_shg_products,update_shg_products_history,update_shg_products,create_shg_revenue,update_shg_revenue_history
+};
