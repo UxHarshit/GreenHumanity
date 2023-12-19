@@ -19,6 +19,22 @@ const User = new mongoose.Schema({
     
 }, { timestamps: true });
 
+const Farmers = new mongoose.Schema({
+    firstname: String,
+    lastname: String,
+    email: String,
+    password: String,
+    phone : String,
+    role: String,
+    state: String,
+    district : String,
+    subdistrict : String,
+    village : String,
+    plot : String,
+    pincode: String,
+   
+}, { timestamps: true });
+    
 const Shgdata = new mongoose.Schema({
     products_history : Array,
     gw : Array,

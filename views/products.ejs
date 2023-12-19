@@ -17,7 +17,9 @@
             const columns = [
                 { label: 'S.No', field: 'id'},
                 { label: 'Name', field: 'name' },
-                { label: 'Quantity', field: 'quantity' },
+                { label : 'Area(Hectares)' ,field : 'area'},
+                { label: 'Plot', field: 'plot' },
+                { label : 'Tehsil' ,field : 'tehsil'},
                 { label: 'Description', field: 'description' },
                 { label: 'Update',field : 'update',edit:false},
                 { label: 'Delete',field : 'delete'}
@@ -115,10 +117,10 @@
                              />
                     </g>
                 </svg>
-                <span class="ml-3 text-xl">Green Humanity(View products)</span>
+                <span class="ml-3 text-xl">Green Humanity(View List)</span>
             </a>
             <nav>
-                <a class="mr-5 hover:text-gray-900" href="products/history">Products history</a>
+                <a class="mr-5 hover:text-gray-900" href="products/history">Farmers history</a>
                 <a onclick="logout()" class="mr-5 hover:text-gray-900" href="contact">Logout</a>
 
             </nav>
@@ -131,9 +133,17 @@
           <input type="text" id="name" name="name" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
         </div>
         <div class="relative flex-grow w-full">
-          <label for="quantity" class="leading-7 text-sm text-gray-600">Quantity</label>
-          <input type="number" id="quantity" name="quantity" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+          <label for="quantity" class="leading-7 text-sm text-gray-600">Area</label>
+          <input type="text" id="quantity" name="area" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
         </div>
+        <div class="relative flex-grow w-full">
+            <label for="quantity" class="leading-7 text-sm text-gray-600">Plot</label>
+            <input type="text" id="quantity" name="plot" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+          </div>
+          <div class="relative flex-grow w-full">
+            <label for="quantity" class="leading-7 text-sm text-gray-600">Tehsil</label>
+            <input type="text" id="quantity" name="tehsil" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+          </div>
         <div class="relative flex-grow w-full">
             <label for="te" class="leading-7 text-sm text-gray-600">Description
             </label>

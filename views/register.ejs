@@ -60,17 +60,14 @@
                 return
             }
 
-            var radioValue = document.querySelector('input[name="default-radio"]:checked').id;
-            if (radioValue == "GreenWorker") {
-                if (education == "" || graduation == "" || certificate == "") {
-                    modal_body.textContent = "Please fill all the fields";
-                    modal.show()
-                    return
-                } else if (!certificate) {
-                    modal_body.textContent = "Please upload certificate";
-                    modal.show()
-                    return
-                }
+            if (education == "" || graduation == "" || certificate == "") {
+                modal_body.textContent = "Please fill all the fields";
+                modal.show()
+                return
+            } else if (!certificate) {
+                modal_body.textContent = "Please upload certificate";
+                modal.show()
+                return
             }
 
             loginTypeErr = false
@@ -231,68 +228,8 @@
                                 class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                 required="">
                         </div>
-                        <button id="dropdownRadioButton" data-dropdown-toggle="dropdownDefaultRadio"
-                            class="text-white w-full bg-green-500 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between dark:bg-green-500 dark:hover:bg-green-700 dark:focus:ring-green-800"
-                            type="button">Select Type <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="2" d="m1 1 4 4 4-4" />
-                            </svg>
-                        </button>
-                        <div id="dropdownDefaultRadio"
-                            class="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600">
-                            <ul class="p-3 space-y-3 text-sm text-gray-700 dark:text-gray-200"
-                                aria-labelledby="dropdownRadioButton">
-                                <li>
-                                    <div class="flex items-center">
-                                        <input id="Consumer" type="radio" value="" name="default-radio"
-                                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                                        <label for="default-radio-1"
-                                            class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                            Consumer
-                                        </label>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <input id="GreenWorker" type="radio" value="" name="default-radio"
-                                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                                        <label for="default-radio-1"
-                                            class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                            Green Worker
-                                        </label>
-                                    </div>
-                                </li>
-                            </ul>
-                            <script>
-                                var button = document.getElementById("dropdownRadioButton")
-                                var input = document.getElementsByName("default-radio")
-                                function radioChaner() {
-                                    var text = this.id
-                                    var gClass = document.getElementById("gClass")
-                                    var registerForm = document.getElementById("registerForm")
-                                    var education = document.getElementById("education")
-                                    var graduation = document.getElementById("graduation")
-                                    var certificate = document.getElementById("dropzonefile")
-                                    if (gClass.classList.contains("hidden") && text == "GreenWorker") {
-                                        registerForm.action = "javascript:register(fullname.value,phone.value,email.value,password.value,confirm_password.value,address.value,city.value,state.value,pincode.value,education.value,graduation.value,document.querySelector('input[id=\"dropzone-file\"]').files[0])"
-                                        gClass.classList.remove("hidden")
-                                        education.setAttribute("required", "")
-                                        graduation.setAttribute("required", "")
-                                    } else {
-                                        if (!gClass.classList.contains("hidden")) {
-                                            gClass.classList.add("hidden")
-                                            education.removeAttribute("required")
-                                            graduation.removeAttribute("required")
-                                            registerForm.action = "javascript:register(fullname.value,phone.value,email.value,password.value,confirm_password.value,address.value,city.value,state.value,pincode.value,null,null,null)"
-                                        }
-                                    }
-                                    button.textContent = text
-                                }
-                                for (var i = 0; i < input.length; i++) {
-                                    input[i].addEventListener("change", radioChaner)
-                                }
-                            </script>
-                        </div>
-                        <div id="gClass" class="space-y-4 md:space-y-6 hidden">
+
+                        <div id="gClass" class="space-y-4 md:space-y-6">
                             <div>
                                 <label for="education"
                                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Education <span

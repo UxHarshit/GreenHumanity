@@ -38,13 +38,9 @@
             }).then((async (res) => {
                 console.log(await res)
                 const data = await res.json()
-                if(data.role == 'SHG'){
-                    window.location.href = '/app/shg_home'
-                } else if(data.role == 'GW'){
-                    window.location.href = '/app/gw_home'
-                } else if(data.role == 'FARMER'){
-                    window.location.href = '/app/farmer_home'
-                }
+      
+                window.location.href = '/app/shg_home'
+
 
                 const staticBackdropLabel = document.getElementById("staticBackdropLabel")
                 if (res.status != 200) {
