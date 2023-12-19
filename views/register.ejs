@@ -21,26 +21,21 @@
         function closeModal() {
             modal.toggle()
         }
-        
+
         function register(fullname, phone, email, password, confirm_password, address, city, state, pincode, education, graduation, certificate) {
             var form = new FormData(document.getElementById("registerForm"))
             console.log(form)
-            
+
             const modal_body = document.getElementById("modal_body")
 
             var radioValue = document.querySelector('input[name="default-radio"]:checked');
-            if(radioValue == '' || radioValue == null || radioValue == undefined || radioValue.length < 2){
+            if (radioValue == '' || radioValue == null || radioValue == undefined || radioValue.length < 2) {
                 modal_body.textContent = "Select type please"
                 modal.show()
                 return
             }
-            if (!certificate){
-                modal_body.textContent = "Please upload certificate"
-                modal.show()
-                return
-            }
 
-            
+
             var email = email;
             if (email == "") {
                 email = "null"
@@ -64,16 +59,24 @@
                 modal.show()
                 return
             }
-            loginTypeErr = false
+
             var radioValue = document.querySelector('input[name="default-radio"]:checked').id;
             if (radioValue == "GreenWorker") {
                 if (education == "" || graduation == "" || certificate == "") {
                     modal_body.textContent = "Please fill all the fields";
                     modal.show()
                     return
+                } else if (!certificate) {
+                    modal_body.textContent = "Please upload certificate";
+                    modal.show()
+                    return
                 }
             }
-            certificate.name = `${firstname}_${lastname}_certificate`
+
+            loginTypeErr = false
+            if (certificate)
+                certificate.name = `${firstname}_${lastname}_certificate`
+            else certificate = null
             var body = new FormData()
             body.append("fullname", fullname)
             body.append("email", email)
@@ -154,9 +157,7 @@
                         class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                         Create an account
                     </h1>
-                    <form
-                    enctype="multipart/form-data"
-                        id="registerForm"
+                    <form enctype="multipart/form-data" id="registerForm"
                         action="javascript:register(fullname.value,phone.value,email.value,password.value,confirm_password.value,address.value,city.value,state.value,pincode.value)"
                         class="space-y-4 md:space-y-6">
                         <div>
@@ -277,7 +278,7 @@
                                         education.setAttribute("required", "")
                                         graduation.setAttribute("required", "")
                                     } else {
-                                        if (!gClass.classList.contains("hidden")){
+                                        if (!gClass.classList.contains("hidden")) {
                                             gClass.classList.add("hidden")
                                             education.removeAttribute("required")
                                             graduation.removeAttribute("required")
@@ -297,8 +298,7 @@
                                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Education <span
                                         class="text-red-600">*</span></label>
                                 <input type="text" name="education" id="education" placeholder="B.Sc in Agriculture"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                    >
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                             </div>
                             <div>
                                 <label for="graduation"
@@ -306,8 +306,7 @@
                                     Graduation
                                     <span class="text-red-600">*</span></label>
                                 <input type="graduation" name="graduation" id="graduation" placeholder="YYYY-MM-DD"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                    >
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                             </div>
                             <div>
                                 <label for="graduation"
@@ -324,9 +323,11 @@
                                         </svg>
                                         <p id="filetext" class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span
                                                 class="font-semibold">Click to upload</span> or drag and drop</p>
-                                        <p id ="temptext"class="text-xs text-gray-500 dark:text-gray-400">PDF, PNG, JPG or GIF</p>
+                                        <p id="temptext" class="text-xs text-gray-500 dark:text-gray-400">PDF, PNG, JPG
+                                            or GIF</p>
                                     </div>
-                                    <input id="dropzone-file" accept=".jpeg , .pdf, .png, .jpg" value="dropzonefile" type="file" class="hidden" />
+                                    <input id="dropzone-file" accept=".jpeg , .pdf, .png, .jpg" value="dropzonefile"
+                                        type="file" class="hidden" />
                                     <script>
                                         var input = document.getElementById("dropzone-file")
                                         var label = document.getElementById("filetext")

@@ -748,7 +748,7 @@ function routes(app) {
         if (!req.session.isLoggedIn) {
             res.render('login')
         } else {
-            res.redirect('/home')
+            res.redirect('/')
         }
 
     });
