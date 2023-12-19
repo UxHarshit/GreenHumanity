@@ -4,6 +4,7 @@ const Razorpay = require('razorpay')
 const crypto = require('crypto')
 const { cart } = require('./modals');
 const multer = require('multer');
+const { URLSearchParams } = require('url');
 const accountSid = 'AC8da6e5392095e5d9b8021e1943daf8d8';
 const authToken = '87337b6fa901b2455c008a98c2e8365f';
 const client = require('twilio')(accountSid, authToken);
@@ -351,7 +352,23 @@ function routes(app) {
     })
 
     app.get('/landing', function (req, res) {
-        res.render('landing');
+        var data = undefined;
+        
+        const formData = new URLSearchParams();
+        formData.append('id', 'farmerbenef');
+
+        fetch('https://wdcpmksy.dolr.gov.in/getwhshomedata',{
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData
+        })
+            .then(res => {
+                data = res.json()
+                console.log(data)
+
+            })
+            .catch(err => console.log(err));
+        res.render('landing',{data:data});
         res.end()
     });
     app.get('/rental_land', function (req, res) {
