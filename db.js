@@ -51,17 +51,7 @@ var shg_exists = async (phone, password) => {
     }
   })
 }
-var create_shg = async (phone, firstname, lastname, area, password, address, state, city, pincode) => {
-  return new Promise((resolve, reject) => {
-    const data = new modal.shgModel({ "phone": phone, "firstname": firstname, "lastname": lastname, "area": area, "GW": [], "password": password, "address": address, "state": state, "city": city, "pincode": pincode });
-    const res = data.save()
-    if (!res) {
-      reject("Unable to add data to user");
-    } else {
-      resolve("done");
-    }
-  })
-}
+
 var get_users = async () => {
   return new Promise(async (resolve, reject) => {
     const data = await modal.usermodel.find();
@@ -160,9 +150,21 @@ var get_shg = async (phone) => {
   })
 }
 
-var update_shg_revenue_history = async (phone, amount, description, status,date) => {
+var create_shgdata = async (phone, firstname, lastname, area, password, address, state, city, pincode) => {
   return new Promise(async (resolve, reject) => {
-    const user = await modal.shgdataModel.updateOne({ phone: phone }, { $push: { revenue_history: { description: description, amount: amount,  status: status,date:date } } }, { upsert: true }).exec()
+    const data = new modal.shgdataModel({ "phone": phone, "firstname": firstname, "lastname": lastname, "area": area, "password": password, "address": address, "state": state, "city": city, "pincode": pincode, "products": [], "products_history": [], "revenue_history": [], "revenue": [] });
+    const res = data.save()
+    if (!res) {
+      reject("Unable to add data to user");
+    } else {
+      resolve("done");
+    }
+  })
+}
+
+var update_shg_revenue_history = async (phone, amount, description, status, date) => {
+  return new Promise(async (resolve, reject) => {
+    const user = await modal.shgdataModel.updateOne({ phone: phone }, { $push: { revenue_history: { description: description, amount: amount, status: status, date: date } } }, { upsert: true }).exec()
     if (!user) {
       reject("User doesn't exists or Email and password are wrong!");
     } else {
@@ -170,9 +172,9 @@ var update_shg_revenue_history = async (phone, amount, description, status,date)
     }
   })
 }
-var create_shg_revenue = async (phone,description, amount,status,date) => {
+var create_shg_revenue = async (phone, description, amount, status, date) => {
   return new Promise(async (resolve, reject) => {
-    const user = await modal.shgdataModel.updateOne({ phone: phone }, { $push: { revenue: {detail: description, amount: amount ,status:status ,date:date} } }, { upsert: true }).exec()
+    const user = await modal.shgdataModel.updateOne({ phone: phone }, { $push: { revenue: { detail: description, amount: amount, status: status, date: date } } }, { upsert: true }).exec()
     if (!user) {
       reject("User doesn't exists or Email and password are wrong!");
     } else {
@@ -214,7 +216,7 @@ var update_shg_products = async (phone, name, quantity, description) => {
 
       resolve(user);
     }
-})
+  })
 }
 
 var create_shg_products = async (phone, name, quantity, description) => {
@@ -228,7 +230,18 @@ var create_shg_products = async (phone, name, quantity, description) => {
     }
   })
 }
+var add_shg_gw = async (phone, name, education, graduation, gw_phone, address) => {
+  return new Promise(async (resolve, reject) => {
+    const user = await modal.shgdataModel.updateOne({ phone: phone }, { $push: { gw: { name: name, education: education, graduation: graduation, phone: gw_phone, address: address } } }, { upsert: true }).exec()
+    if (!user) {
+      reject("User doesn't exists or Email and password are wrong!");
+    } else {
+      resolve(user);
 
+    }
+  })
+
+}
 var create_user = async (phone, email, password, firstname, lastname, address, state, city, pincode, education, graduation, role, verified) => {
   return new Promise((resolve, reject) => {
     const data = new modal.usermodel({ "email": email, "password": password, cart: [], "phone": phone, "firstname": firstname, "lastname": lastname, "imageid": "null", "address": address, "state": state, "city": city, "pincode": pincode, "orders": [], "education": education, "graduation": graduation, "role": role, "verified": verified });
@@ -242,5 +255,6 @@ var create_user = async (phone, email, password, firstname, lastname, address, s
 }
 module.exports = {
   connectToDatabase, user_exists, create_user, user_exists_phone, get_users, admin_exists_email, addtocart, updateCart, removefromcart, updateItem, insertOrders
-  , get_areas, create_shg, shg_exists, get_shg, delete_shg_products,create_shg_products,update_shg_products_history,update_shg_products,create_shg_revenue,update_shg_revenue_history
+  , get_areas, create_shgdata, shg_exists, get_shg, delete_shg_products, create_shg_products, update_shg_products_history, update_shg_products, create_shg_revenue, update_shg_revenue_history
+  , add_shg_gw
 };

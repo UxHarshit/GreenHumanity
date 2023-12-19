@@ -21,6 +21,7 @@ const User = new mongoose.Schema({
 
 const Shgdata = new mongoose.Schema({
     products_history : Array,
+    gw : Array,
     revenue_history : Array,
     deleted_inventory : Array,
     phone : String,

@@ -33,6 +33,20 @@ async function sendSMS(to, from, text) {
 }
 function routes(app) {
 
+
+    app.get('/app/shg/:id/view_gw', (req, res) => {
+        if (!req.session.isLoggedIn) {
+            res.redirect('/login')
+            return
+        }
+        const shg_id = req.params.id
+        db.get_shg(shg_id).then((data) => {
+            res.status(200).render('view_gw', { data: JSON.stringify(data.gw), id: shg_id })
+        }).catch((err) => {
+            res.status(404).json({ "error": "Not found" });
+            console.log(err)
+        })
+    })
     app.get('/app/shg/:id/products', (req, res) => {
         if (!req.session.isLoggedIn) {
             res.redirect('/login')
