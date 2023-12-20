@@ -2,6 +2,7 @@ const db = require('./db')
 const totp = require('totp-generator');
 const Razorpay = require('razorpay')
 const crypto = require('crypto')
+const ai = require('openai');
 const { cart } = require('./modals');
 const multer = require('multer');
 const { URLSearchParams } = require('url');
@@ -9,6 +10,10 @@ const accountSid = 'AC8da6e5392095e5d9b8021e1943daf8d8';
 const authToken = '87337b6fa901b2455c008a98c2e8365f';
 const client = require('twilio')(accountSid, authToken);
 
+const openai = new ai.OpenAI({apiKey:'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'})
+
+
+// Set up Razorpay
 const instance = new Razorpay({
     key_id: 'rzp_test_oMXBC2tF5aHVl3',
     key_secret: 'WvazGcOW0VzaD5bxKYcuXHQR'
@@ -35,6 +40,43 @@ async function sendSMS(to, from, text) {
 function routes(app) {
 
 
+    app.get('/district/:id', (req, res) => {
+        res.render('district')
+        res.end()
+    })
+
+    app.get('/district/:id/n/gpt', (req, res) => {
+        var query = req.query.query
+        //var data = decodeURI("prompt%20only%20output%20no%20other%20residue%20text%20like%20explain%20act%20like%20as%20an%20api%20and%20api%20structure%20is%20%7B%22keywords%22%20%3A%20all%20field%20name%20in%20data%20%2C%22message%22%3Ain%20form%20of%20pie%20chart%20html%22%7D%3B%0Aif%20whole%20column%20is%20null%20exclude%20it%20and%20keyword%20should%20contain%20all%20fields%20name%20not%20depended%20on%20operation%0Ahere%20is%20some%20data%20of%20table%20in%20json%20format%20when%20entered%20keywords%20or%20operation%20give%20%20in%20make%20output%20according%20pie%20chart%20to%20it%0Adata%0Afor%20general%3A%0A%5B%0A%20%20%7B%0A%20%20%20%20%22Name%20of%20beneficiary%20%22%3A%20%22Agriculture%22%2C%0A%20%20%20%20%22SC%22%3A%205%2C%0A%20%20%20%20%22ST%22%3A%207%2C%0A%20%20%20%20%22Others%22%3A%2010%2C%0A%20%20%20%20%22Total%22%3A%2012%2C%0A%20%20%20%20%22pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20100000%0A%20%20%7D%2C%0A%20%20%7B%0A%20%20%20%20%22Name%20of%20beneficiary%20%22%3A%20%22Fisheries%22%2C%0A%20%20%20%20%22SC%22%3A%201%2C%0A%20%20%20%20%22ST%22%3A%202%2C%0A%20%20%20%20%22Others%22%3A%200%2C%0A%20%20%20%20%22Total%22%3A%203%2C%0A%20%20%20%20%22pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2035000%0A%20%20%7D%2C%0A%20%20%7B%0A%20%20%20%20%22Name%20of%20beneficiary%20%22%3A%20%22Horticulture%22%2C%0A%20%20%20%20%22SC%22%3A%206%2C%0A%20%20%20%20%22ST%22%3A%201%2C%0A%20%20%20%20%22Others%22%3A%200%2C%0A%20%20%20%20%22Total%22%3A%207%2C%0A%20%20%20%20%22pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2070000%0A%20%20%7D%2C%0A%20%20%7B%0A%20%20%20%20%22Name%20of%20beneficiary%20%22%3A%20%22Live%20Stocks%22%2C%0A%20%20%20%20%22SC%22%3A%202%2C%0A%20%20%20%20%22ST%22%3A%203%2C%0A%20%20%20%20%22Others%22%3A%201%2C%0A%20%20%20%20%22Total%22%3A%206%2C%0A%20%20%20%20%22pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2065000%0A%20%20%7D%2C%0A%20%20%7B%0A%20%20%20%20%22Name%20of%20beneficiary%20%22%3A%20%22others%22%2C%0A%20%20%20%20%22SC%22%3A%200%2C%0A%20%20%20%20%22ST%22%3A%200%2C%0A%20%20%20%20%22Others%22%3A%201%2C%0A%20%20%20%20%22Total%22%3A%201%2C%0A%20%20%20%20%22pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2010000%0A%20%20%7D%0A%5D%0Afor%20livestocks%3A%0A%7B%0A%20%20%22activities%22%3A%20%5B%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Milch%20Cow%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%203%2C%0A%20%20%20%20%20%20%22ST%22%3A%200%2C%0A%20%20%20%20%20%20%22Others%22%3A%2020%2C%0A%20%20%20%20%20%20%22Total%22%3A%2023%2C%0A%20%20%20%20%20%20%22Women%22%3A%205%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2048000%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Goatery%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%2021%2C%0A%20%20%20%20%20%20%22ST%22%3A%200%2C%0A%20%20%20%20%20%20%22Others%22%3A%20151%2C%0A%20%20%20%20%20%20%22Total%22%3A%20172%2C%0A%20%20%20%20%20%20%22Women%22%3A%2020%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2030000%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Duckery%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%2022%2C%0A%20%20%20%20%20%20%22ST%22%3A%200%2C%0A%20%20%20%20%20%20%22Others%22%3A%20110%2C%0A%20%20%20%20%20%20%22Total%22%3A%20132%2C%0A%20%20%20%20%20%20%22Women%22%3A%2090%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2025000%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Poultry%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%2014%2C%0A%20%20%20%20%20%20%22ST%22%3A%200%2C%0A%20%20%20%20%20%20%22Others%22%3A%2095%2C%0A%20%20%20%20%20%20%22Total%22%3A%20109%2C%0A%20%20%20%20%20%20%22Women%22%3A%2080%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2025000%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Beekeeping%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%20null%2C%0A%20%20%20%20%20%20%22Total%22%3A%20null%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20null%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22SRI%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%201%2C%0A%20%20%20%20%20%20%22Total%22%3A%201%2C%0A%20%20%20%20%20%20%22Women%22%3A%201%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2020000%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Vermi%20compost%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%20null%2C%0A%20%20%20%20%20%20%22Total%22%3A%20null%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20null%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Piggery%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%20null%2C%0A%20%20%20%20%20%20%22Total%22%3A%20null%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20null%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Fishery%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%20null%2C%0A%20%20%20%20%20%20%22Total%22%3A%20null%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20null%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Pasture%20Development%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%20null%2C%0A%20%20%20%20%20%20%22Total%22%3A%20null%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20null%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Carpentry%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%202%2C%0A%20%20%20%20%20%20%22Total%22%3A%202%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2020000%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Cycle%20Repairing%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%20null%2C%0A%20%20%20%20%20%20%22Total%22%3A%20null%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20null%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Rice%20Processing%20Unit%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%20null%2C%0A%20%20%20%20%20%20%22Total%22%3A%20null%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20null%0A%20%20%20%20%7D%0A%20%20%5D%0A%7D%0Aoperation%20%3A%20show%20general%20data%20in%20html%20pie%20chart")
+        var data = decodeURI("prompt%20only%20output%20no%20other%20residue%20text%20like%20explain%20act%20like%20as%20an%20api%20and%20api%20structure%20is%20%7B%22keywords%22%20%3A%20all%20field%20name%20in%20data%20%2C%22message%22%3Ain%20form%20of%20pie%20chart%20html%22%7D%3B%0Aif%20whole%20column%20is%20null%20exclude%20it%20and%20keyword%20should%20contain%20all%20fields%20name%20not%20depended%20on%20operation%0Ahere%20is%20some%20data%20of%20table%20in%20json%20format%20when%20entered%20keywords%20or%20operation%20give%20%20in%20make%20output%20according%20pie%20chart%20to%20it%0Adata%0Afor%20general%3A%0A%5B%0A%20%20%7B%0A%20%20%20%20%22Name%20of%20beneficiary%20%22%3A%20%22Agriculture%22%2C%0A%20%20%20%20%22SC%22%3A%205%2C%0A%20%20%20%20%22ST%22%3A%207%2C%0A%20%20%20%20%22Others%22%3A%2010%2C%0A%20%20%20%20%22Total%22%3A%2012%2C%0A%20%20%20%20%22pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20100000%0A%20%20%7D%2C%0A%20%20%7B%0A%20%20%20%20%22Name%20of%20beneficiary%20%22%3A%20%22Fisheries%22%2C%0A%20%20%20%20%22SC%22%3A%201%2C%0A%20%20%20%20%22ST%22%3A%202%2C%0A%20%20%20%20%22Others%22%3A%200%2C%0A%20%20%20%20%22Total%22%3A%203%2C%0A%20%20%20%20%22pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2035000%0A%20%20%7D%2C%0A%20%20%7B%0A%20%20%20%20%22Name%20of%20beneficiary%20%22%3A%20%22Horticulture%22%2C%0A%20%20%20%20%22SC%22%3A%206%2C%0A%20%20%20%20%22ST%22%3A%201%2C%0A%20%20%20%20%22Others%22%3A%200%2C%0A%20%20%20%20%22Total%22%3A%207%2C%0A%20%20%20%20%22pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2070000%0A%20%20%7D%2C%0A%20%20%7B%0A%20%20%20%20%22Name%20of%20beneficiary%20%22%3A%20%22Live%20Stocks%22%2C%0A%20%20%20%20%22SC%22%3A%202%2C%0A%20%20%20%20%22ST%22%3A%203%2C%0A%20%20%20%20%22Others%22%3A%201%2C%0A%20%20%20%20%22Total%22%3A%206%2C%0A%20%20%20%20%22pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2065000%0A%20%20%7D%2C%0A%20%20%7B%0A%20%20%20%20%22Name%20of%20beneficiary%20%22%3A%20%22others%22%2C%0A%20%20%20%20%22SC%22%3A%200%2C%0A%20%20%20%20%22ST%22%3A%200%2C%0A%20%20%20%20%22Others%22%3A%201%2C%0A%20%20%20%20%22Total%22%3A%201%2C%0A%20%20%20%20%22pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2010000%0A%20%20%7D%0A%5D%0Afor%20livestocks%3A%0A%7B%0A%20%20%22activities%22%3A%20%5B%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Milch%20Cow%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%203%2C%0A%20%20%20%20%20%20%22ST%22%3A%200%2C%0A%20%20%20%20%20%20%22Others%22%3A%2020%2C%0A%20%20%20%20%20%20%22Total%22%3A%2023%2C%0A%20%20%20%20%20%20%22Women%22%3A%205%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2048000%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Goatery%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%2021%2C%0A%20%20%20%20%20%20%22ST%22%3A%200%2C%0A%20%20%20%20%20%20%22Others%22%3A%20151%2C%0A%20%20%20%20%20%20%22Total%22%3A%20172%2C%0A%20%20%20%20%20%20%22Women%22%3A%2020%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2030000%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Duckery%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%2022%2C%0A%20%20%20%20%20%20%22ST%22%3A%200%2C%0A%20%20%20%20%20%20%22Others%22%3A%20110%2C%0A%20%20%20%20%20%20%22Total%22%3A%20132%2C%0A%20%20%20%20%20%20%22Women%22%3A%2090%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2025000%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Poultry%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%2014%2C%0A%20%20%20%20%20%20%22ST%22%3A%200%2C%0A%20%20%20%20%20%20%22Others%22%3A%2095%2C%0A%20%20%20%20%20%20%22Total%22%3A%20109%2C%0A%20%20%20%20%20%20%22Women%22%3A%2080%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2025000%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Beekeeping%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%20null%2C%0A%20%20%20%20%20%20%22Total%22%3A%20null%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20null%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22SRI%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%201%2C%0A%20%20%20%20%20%20%22Total%22%3A%201%2C%0A%20%20%20%20%20%20%22Women%22%3A%201%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2020000%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Vermi%20compost%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%20null%2C%0A%20%20%20%20%20%20%22Total%22%3A%20null%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20null%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Piggery%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%20null%2C%0A%20%20%20%20%20%20%22Total%22%3A%20null%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20null%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Fishery%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%20null%2C%0A%20%20%20%20%20%20%22Total%22%3A%20null%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20null%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Pasture%20Development%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%20null%2C%0A%20%20%20%20%20%20%22Total%22%3A%20null%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20null%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Carpentry%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%202%2C%0A%20%20%20%20%20%20%22Total%22%3A%202%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%2020000%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Cycle%20Repairing%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%20null%2C%0A%20%20%20%20%20%20%22Total%22%3A%20null%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20null%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22Name%20of%20activity%22%3A%20%22Rice%20Processing%20Unit%22%2C%0A%20%20%20%20%20%20%22SC%22%3A%20null%2C%0A%20%20%20%20%20%20%22ST%22%3A%20null%2C%0A%20%20%20%20%20%20%22Others%22%3A%20null%2C%0A%20%20%20%20%20%20%22Total%22%3A%20null%2C%0A%20%20%20%20%20%20%22Women%22%3A%20null%2C%0A%20%20%20%20%20%20%22Pre%20Project%20average%20income%20per%20hectare%20in%20RS%22%3A%20null%0A%20%20%20%20%7D%0A%20%20%5D%0A%7D%0Aoperation%20%3A%20")    
+        data = data + query
+        console.log(query)
+        const completion = openai.chat.completions.create({
+            messages: [{ role: "system", content: data }],
+            model: "gpt-3.5-turbo",
+          }).then((result) => {
+            result = result.choices[0].message.content.replace(/\\n/g, '');
+            var data = JSON.parse(result)
+            console.log(data.message)
+
+            res.status(200).send(data.message)
+            res.end()
+          }).catch((err) => {
+            res.status(500).send({data : "Internal server error"})
+            res.end()
+          });
+    })
+
+    app.get('/district/d/:id', (req, res) => {
+        res.render('d')
+        res.end()
+    })
+    app.get('/district/d/:id/n', (req, res) => {
+        res.render('n')
+        res.end()
+    })
+
+
     app.get('/app/shg/:id/view_gw', (req, res) => {
         if (!req.session.isLoggedIn) {
             res.redirect('/login')
@@ -48,6 +90,7 @@ function routes(app) {
             console.log(err)
         })
     })
+    
     app.get('/app/shg/:id/products', (req, res) => {
         if (!req.session.isLoggedIn) {
             res.redirect('/login')
@@ -83,21 +126,17 @@ function routes(app) {
         }
         const id = req.params.id
         const name = req.query.name
-        const quantity = req.query.quantity
+        const area = req.query.area
+        const plot = req.query.tehsil
         const description = req.query.description
-        if (name == null || name.length < 2 || quantity == null || quantity.length < 1 || isNaN(quantity) || description == null || description.length < 2) {
+        if (name == null || name.length < 2 || area == null || area.length < 2 || plot == null || plot.length < 2 || description == null || description.length < 2) {
             res.status(400).json({ "error": "bad request" });
             return;
         }
         db.get_shg(id).then((data) => {
-          
-            db.create_shg_products(id, name, quantity, description).then((data) => {
-                db.update_shg_products_history(id, name, quantity, description, "added").then((data) => {
-                    res.redirect(`/app/shg/${id}/products`)
-                }).catch((err) => {
-                    res.status(404).json({ "error": "Not found" });
-                    console.log(err)
-                })
+            db.create_shg_products(id,name,area,plot,tehsil,description).then((data) => {
+                res.redirect(`/app/shg/${id}/products`)
+
             }).catch((err) => {
                 res.status(404).json({ "error": "Not found" });
                 console.log(err)
@@ -207,7 +246,7 @@ function routes(app) {
     })
 
     app.get('/app/shg/:id/revenue/add', (req, res) => {
-        if(!req.session.isLoggedIn){
+        if (!req.session.isLoggedIn) {
             res.redirect('/login')
             return
         }
@@ -217,14 +256,14 @@ function routes(app) {
         const description = req.query.description
         const date = req.query.date
         const status = req.query.status
-        console.log(id,amount,description,status)
+        console.log(id, amount, description, status)
         if (amount == null || amount.length < 1 || isNaN(amount) || description == null || description.length < 2) {
             res.status(400).json({ "error": "bad request" });
             return;
         }
         db.get_shg(id).then((data) => {
-            db.create_shg_revenue(id,description, amount, status,date).then((data) => {
-                db.update_shg_revenue_history(id, amount, description, status,date).then((data) => {
+            db.create_shg_revenue(id, description, amount, status, date).then((data) => {
+                db.update_shg_revenue_history(id, amount, description, status, date).then((data) => {
                     res.redirect(`/app/shg/${id}/revenue`)
                 }).catch((err) => {
                     res.status(404).json({ "error": "Not found" });
@@ -235,7 +274,7 @@ function routes(app) {
                 console.log(err)
             })
         })
-        
+
 
     })
     app.post('/api/razorpay/verifyPayment', (req, res) => {
@@ -351,25 +390,44 @@ function routes(app) {
         });
     })
 
-    app.get('/landing', function (req, res) {
-        var data = undefined;
-        
-        const formData = new URLSearchParams();
-        formData.append('id', 'farmerbenef');
-
-        fetch('https://wdcpmksy.dolr.gov.in/getwhshomedata',{
+    app.post('/dcricle', (req, res) => {
+        var id = req.body.id;
+        if (id == null || id.length < 1) {
+            res.status(400).json({ "error": "Bad request" });
+            return;
+        }
+        fetch('https://wdcpmksy.dolr.gov.in/getcircledisrictdata', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: formData
+            body: new URLSearchParams({ 'id':id, 'activity': 'farmerbenef' })
         })
-            .then(res => {
-                data = res.json()
-                console.log(data)
-
+            .then(res => res.json())
+            .then(json => {
+                data = json;
+                res.status(200).json(data);
+                res.end()
             })
             .catch(err => console.log(err));
-        res.render('landing',{data:data});
-        res.end()
+    })
+
+    app.get('/landing', function (req, res) {
+        var data = undefined;
+
+
+        fetch('https://wdcpmksy.dolr.gov.in/getwhshomedata', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ 'id': 'farmerbenef' })
+        })
+            .then(res => res.json())
+            .then(json => {
+                data = json;
+                res.render('landing', { data: data });
+                res.end()
+            })
+            .catch(err => console.log(err));
+
+
     });
     app.get('/rental_land', function (req, res) {
         const phone = req.session.phone;

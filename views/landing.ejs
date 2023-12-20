@@ -17,6 +17,67 @@
 
       element.scrollIntoView({ behavior: "smooth" });
     }
+    var modal;
+    var second = true;
+    function init_modal() {
+      const modal_element = document.getElementById("exampleModalScrollable")
+      modal = new te.Modal(modal_element);
+    }
+    function closeModal() {
+      document.getElementById('modal_body').innerHTML = ''
+      modal.toggle()
+    }
+
+    function getStateDate(id, state, total) {
+      fetch('/dcricle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          "id": id
+        })
+
+      }).then((async (res) => {
+        console.log(await res)
+        const data = await JSON.parse(await res.text())
+        var table = '<table class=""><thead><tr><th class="border border-green-800 px-4 py-2">District Name</th><th class="border border-green-800 px-4 py-2">Number of Benefited Farmers</th></tr></thead><tbody>'
+        var table = document.createElement('table');
+        table.className = 'table-auto border-collapse border border-green-800';
+        var thead = document.createElement('thead');
+        var tr = document.createElement('tr');
+        var th = document.createElement('th');
+        th.className = 'border border-green-800 px-4 py-2';
+
+        document.getElementById('modal_body').innerHTML = ''
+
+        th.innerHTML = 'District Name';
+        tr.appendChild(th);
+        var th = document.createElement('th');
+        th.className = 'border border-green-800 px-4 py-2';
+
+        th.innerHTML = 'Number of Benefited Farmers';
+        tr.appendChild(th);
+        thead.appendChild(tr);
+        table.appendChild(thead);        
+
+
+        for (var i = 0; i < data.length; i++) {
+          var div = document.createElement('tr');
+          div.className = 'border border-green-800 px-4 py-2';
+        
+          div.innerHTML = '<td class="border border-green-800 px-4 py-2"> <a href="/district/d/' + data[i].dist_code + '"/>' + data[i].dist_name + '</td>' + '<td class="border border-green-800 px-4 py-2">' + data[i].headerdesc + '</td>';
+          //div.innerHTML = '<h2 class="font-bold">' + data[i].dist_name + '</h2>' + '<h2 class="font-bold">&nbsp;' + data[i].headerdesc + '</h2>';\
+          table.appendChild(div);
+
+        }
+        table.innerHTML += '</tbody></table>'
+        document.getElementById('modal_body').appendChild(table)
+      })).catch((err) => {
+        console.log("Internal server error 500 -> " + err);
+      })
+
+    }
 
     function checkLogin() {
 
@@ -131,38 +192,24 @@
   <section id="about" class="text-gray-600 body-font">
     <div class="container px-5 py-8 mx-auto">
       <div class="flex flex-col text-center w-full mb-20">
-        <h1 class="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">Green Humanity</h1>
+        <h2 class="sm:text-3xl font-normal title-font mb-4 text-gray-900">States Under WCDC</h2>
 
-        <section class="text-gray-600 body-font">
-          <div class="container px-5 py-24 mx-auto">
+        <section class="text-gray-600 body-font ">
+
+          <div class="container px-5 py-4 mx-auto">
             <div class="flex flex-wrap justify-center -m-4">
+              <% for(var i=0;i<data.length;i++){ %>
+                <button type="button"
+                  onclick="getStateDate('<%= data[i].st_code %>','<%= data[i].stname %>','<%= data[i].headerdesc %>')"
+                  id="<%= data[i].st_code %>"
+                  class="inline-block rounded bg-green-500 m-3 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
+                  data-te-toggle="modal" data-te-target="#exampleModalScrollable" data-te-ripple-init
+                  data-te-ripple-color="light">
 
-              <!-- Button trigger modal -->
-              <button type="button"
-                class="inline-block rounded bg-primary m-8 mr-8 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
-                data-te-toggle="modal" data-te-target="#exampleModalScfrollable" data-te-ripple-init
-                data-te-ripple-color="light">
-                ANDHRA PRADESH
-              </button>
-              <button type="button"
-                class="inline-block rounded bg-primary m-8 mr-8 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
-                data-te-toggle="modal" data-te-target="#exampleModalScrofllable" data-te-ripple-init
-                data-te-ripple-color="light">
-                ARUNACHAL PRADESH
-              </button>
+                  <%=data[i].stname%>
+                </button>
+                <% } %>
 
-              <button type="button"
-                class="inline-block rounded bg-primary m-8 mr-8 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
-                data-te-toggle="modal" data-te-target="#exampleModalScrollable" data-te-ripple-init
-                data-te-ripple-color="light">
-                ASSAM
-              </button>
-              <button type="button"
-                class="inline-block rounded bg-primary m-8 mr-8 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
-                data-te-toggle="modal" data-te-target="#exampleModalScrollsable" data-te-ripple-init
-                data-te-ripple-color="light">
-                BIHAR
-              </button>
             </div>
 
           </div>
@@ -253,63 +300,33 @@
 
         <!--Modal body-->
 
-        <div class="relative overflow-y-auto p-4">
+        <div id="modal_body" class="relative overflow-y-auto p-4">
           <div class="flex">
             <h2 class="font-bold">Distict Name - </h2>
-            <h2 class="font-bold">&nbsp;Number of Benifited Farmers</h2>
+            <h2 class="font-bold">&nbsp;Number of Benefited Farmers</h2>
           </div>
-          <div class="flex">
-            <p >BAKSA -</p>
-            <p >&nbsp;1292</p>
-          </div>
-          <div class="flex">
-            <p >CACHAR -</p>
-            <p >&nbsp;1753</p>
-          </div>
-          <div class="flex">
-            <p >BONGAIGAON -</p>
-            <p >&nbsp;688</p>
-          </div>
-          <div class="flex">
-            <p >CHIRANG -</p>
-            <p >&nbsp;1653</p>
-          </div>
-          <div class="flex">
-            <p >DIBRUGARH -</p>
-            <p >&nbsp;2049</p>
-          </div>
-          <div class="flex">
-            <p >HOJAI -</p>
-            <p >&nbsp;1916</p>
-          </div>
-          
-
-          
-
-          
-
-          
 
 
-          <div style="height:800px;"></div>
-          <p>State Wise Data</p>
+
+
         </div>
 
         <!--Modal footer-->
         <div
           class="flex flex-shrink-0 flex-wrap items-center justify-end rounded-b-md border-t-2 border-neutral-100 border-opacity-100 p-4 dark:border-opacity-50">
-          <button type="button"
+          <button type="button" onclick="if(second){ second = false; modal.toggle() }"
             class="inline-block rounded bg-primary-100 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-primary-700 transition duration-150 ease-in-out hover:bg-primary-accent-100 focus:bg-primary-accent-100 focus:outline-none focus:ring-0 active:bg-primary-accent-200"
             data-te-modal-dismiss data-te-ripple-init data-te-ripple-color="light">
             Close
           </button>
-          
+
         </div>
       </div>
     </div>
   </div>
 
   <script type="text/javascript" src="tw-elements/dist/js/tw-elements.umd.min.js"></script>
+  <script>init_modal()</script>
 
 </body>
 

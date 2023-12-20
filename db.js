@@ -219,9 +219,9 @@ var update_shg_products = async (phone, name, quantity, description) => {
   })
 }
 
-var create_shg_products = async (phone, name, quantity, description) => {
+var create_shg_products = async (phone, name, area, plot,tehsil,description) => {
   return new Promise(async (resolve, reject) => {
-    const user = await modal.shgdataModel.updateOne({ phone: phone }, { $push: { products: { name: name, quantity: quantity, description: description } } }, { upsert: true }).exec()
+    const user = await modal.shgdataModel.updateOne({ phone: phone }, { $push: { products: { name: name, area:area ,plot:plot,tehsil:tehsil,description:description } } }, { upsert: true }).exec()
     if (!user) {
       reject("User doesn't exists or Email and password are wrong!");
     } else {

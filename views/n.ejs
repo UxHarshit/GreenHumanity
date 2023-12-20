@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Details</title>
+    <link rel="icon" type="images/png" href="images/logo.png">
+
+    <link rel="stylesheet" href="../tw-elements/dist/css/tw-elements.min.css">
+    <link rel="stylesheet" href="../flowbite/dist/flowbite.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <link rel="stylesheet" href="/assets/shg_home.css">
+    <script>
+        function getGpt(query) {
+            fetch('/district/ll/n/gpt?query=' + query, {
+                method: 'GET',
+            }).then(res => res.text())
+                .then(data => {
+                    console.log(data);
+                    document.getElementById('gpt_box').innerHTML = data;
+
+                })
+        }
+    </script>
+</head>
+
+<body>
+    <header class="text-gray-600 bg-gray-100">
+        <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
+            <a class="flex font-medium items-center text-gray-900  md:mb-0">
+                <img src="/images/logo1.png" class="w-14 h-14 text-white p-2 rounded-full" />
+                <span class="ml-3 font-bold text-xl">Green Humanity - Niz Joynagar MWS – 3C2C4d2 | in detail</span>
+            </a>
+            <nav class="md:ml-auto flex flex-wrap items-center text-base justify-center">
+
+                <a class="mr-5 hover:text-gray-900" href="logout">Logout</a>
+
+            </nav>
+        </div>
+    </header>
+
+    <section class="text-gray-600 body-font relative">
+        <div class="flex px-20 ml-20 mx-auto inline-flex sm:flex-nowrap flex-wrap ">
+
+            <div class="lg:w-1/3 md:w-1/2  items-center bg-white flex flex-col w-full md:py-8 md:mt-0">
+                <section class="text-gray-600 body-font">
+                    <div id="prompt_box"
+                        class='flex-row  mx-auto mt-4 rounded-2xl items-center shadow-md p-8  bg-gray-100'>
+                        <div class="flex-row min-w-full justify-center">
+
+                            <input type="text" id="myInput"
+                                class="border border-blue-500 px-4 py-2 rounded-lg focus:outline-none min-w-full focus:border-blue-500"
+                                onkeyup="myFunction()" placeholder="Search for data..." title="Type in a name">
+                            <button type="button" onclick="getGpt (document.getElementById('myInput').value)"
+                                class="text-white p-4 bg-gradient-to-br m-4 from-green-400 to-green-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                Search
+                            </button>
+                        </div>
+                        <div class="flex mt-4">
+                            <button type="button" onclick="document.getElementById('list').classList.remove('hidden');"
+                                class="text-black p-4 bg-gradient-to-br bg-transparent hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                Agriculture
+                            </button>
+                            <button type="button" onclick="document.getElementById('list').classList.remove('hidden');"
+                                class="text-black p-4 bg-gradient-to-br bg-transparent hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                Fisheries
+                            </button>
+                            <button type="button" onclick="document.getElementById('list').classList.remove('hidden');"
+                                class="text-black p-4 bg-gradient-to-br bg-transparent to-green-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                Horticulture
+                            </button>
+                            <button type="button" onclick="document.getElementById('list').classList.remove('hidden');"
+                                class="text-black p-4 bg-gradient-to-br bg-transparent to-green-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                Live Stocks
+                            </button>
+                            <button type="button" onclick="document.getElementById('list').classList.remove('hidden');"
+                                class="text-black p-4 bg-gradient-to-br bg-transparent to-green-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                Others
+                            </button>
+                        </div>
+                        <div id="gpt_box">
+                            "<div style='text-align: center;'>
+                                <h2>Pre Project Average Income per Hectare</h2><canvas id='pieChart'></canvas>
+                            </div>
+                            <script src='https://cdn.jsdelivr.net/npm/chart.js'></script>
+                            <script>var data = { labels: ['Agriculture', 'Fisheries', 'Horticulture', 'Live Stocks', 'others'], datasets: [{ data: [100000, 35000, 70000, 65000, 10000], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#E7E9ED'] }] }; var ctx = document.getElementById('pieChart').getContext('2d'); var myPieChart = new Chart(ctx, { type: 'pie', data: data });</script>
+                        </div>
+
+                        <!--
+                        
+                        <div style='text-align: center;'>
+                            <h2>Pre Project Average Income per Hectare</h2><canvas id='pieChart'></canvas>
+                        </div>
+                        <script src='https://cdn.jsdelivr.net/npm/chart.js'></script>
+                        <script>var data = { labels: ['Agriculture', 'Fisheries', 'Horticulture', 'Live Stocks', 'others'], datasets: [{ data: [100000, 35000, 70000, 65000, 10000], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#E7E9ED'] }] }; var ctx = document.getElementById('pieChart').getContext('2d'); var myPieChart = new Chart(ctx, { type: 'pie', data: data });</script>
+                    `-->
+
+                    </div>
+                                
+
+                    
+                </section>
+
+            </div>
+            <div class="bg-gray-100 ml-20 p-40 ">
+                <canvas id="comparisonChart" width="400" height="400"></canvas>
+
+            </div>
+        </div>
+    </section>
+    <script>
+        // Sample data
+        var data = {
+            labels: ['agriculture', 'horticulture', 'fisheries', 'livestocks', 'others'],
+            datasets: [
+                {
+                    label: 'Before',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    data: [100000 ,35000, 0, 45000 ,15000]
+                },
+                {
+                    label: 'After',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                    data: [150000, 60000, 20000, 65000, 10000]
+                }
+            ]
+        };
+
+        // Chart configuration
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        };
+
+        // Get the canvas element
+        var ctx = document.getElementById('comparisonChart').getContext('2d');
+
+        // Create the chart
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: options
+        });
+    </script>
+    <script src="/flowbite/dist/flowbite.min.js"></script>
+
+    <script type="text/javascript" src="/tw-elements/dist/js/tw-elements.umd.min.js"></script>
+
+</body>
+
+</html>
